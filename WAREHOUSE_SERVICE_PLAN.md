@@ -1,120 +1,156 @@
 # Warehouse Service - Implementation Plan
 
 ## Project Overview
-A warehouse management system built with Spring Boot 3.5.7, Java 21, PostgreSQL, and Liquibase for tracking items, variants, pricing, and stock levels.
+A warehouse management system built with Spring Boot 3.5.7, Java 21, and MongoDB for tracking items, variants, pricing, and stock levels.
 
 ---
 
 ## 1. Database Schema Design
 
-### 1.1 Tables Structure
+### 1.1 Collections Structure
 
 #### **items**
 Stores the base item information.
 
-```sql
-CREATE TABLE items (
-    id              BIGSERIAL PRIMARY KEY,
-    sku             VARCHAR(100) UNIQUE NOT NULL,
-    name            VARCHAR(255) NOT NULL,
-    description     TEXT,
-    base_price      DECIMAL(19, 2) NOT NULL,
-    is_active       BOOLEAN DEFAULT true,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT chk_base_price_positive CHECK (base_price >= 0)
-);
+```json
+{
+  "_id": "ObjectId",
+  "sku": "ITEM-001",
+  "name": "Basic T-Shirt",
+  "description": "Cotton T-Shirt",
+  "basePrice": 19.99,
+  "isActive": true,
+  "createdAt": 1699704000000,
+  "updatedAt": 1699704000000
+}
+```
 
-CREATE INDEX idx_items_sku ON items(sku);
-CREATE INDEX idx_items_is_active ON items(is_active);
+**Note**: `createdAt` and `updatedAt` are stored as Long (Epoch timestamp in milliseconds)
+
+**Indexes:**
+```javascript
+db.items.createIndex({ "sku": 1 }, { unique: true })
+db.items.createIndex({ "isActive": 1 })
+db.items.createIndex({ "name": "text", "description": "text" })
+```
+
+**Validation Rules:**
+```javascript
+db.createCollection("items", {
+  validator: {
+    $jsonSchema: {
+      required: ["sku", "name", "basePrice"],
+      properties: {
+        sku: { bsonType: "string", maxLength: 100 },
+        name: { bsonType: "string", maxLength: 255, minLength: 3 },
+        description: { bsonType: "string", maxLength: 2000 },
+        basePrice: { bsonType: "decimal", minimum: 0 },
+        isActive: { bsonType: "bool" }
+      }
+    }
+  }
+})
 ```
 
 #### **variants**
 Stores item variants (sizes, colors, etc.).
 
-```sql
-CREATE TABLE variants (
-    id              BIGSERIAL PRIMARY KEY,
-    item_id         BIGINT NOT NULL,
-    variant_sku     VARCHAR(100) UNIQUE NOT NULL,
-    variant_name    VARCHAR(255) NOT NULL,
-    attributes      JSONB,  -- For flexible attributes like {"size": "L", "color": "Red"}
-    price_adjustment DECIMAL(19, 2) DEFAULT 0,
-    is_active       BOOLEAN DEFAULT true,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_variant_item FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
-    CONSTRAINT chk_price_adjustment CHECK (price_adjustment >= -base_price)
-);
-
-CREATE INDEX idx_variants_item_id ON variants(item_id);
-CREATE INDEX idx_variants_variant_sku ON variants(variant_sku);
-CREATE INDEX idx_variants_is_active ON variants(is_active);
-CREATE INDEX idx_variants_attributes ON variants USING GIN(attributes);
+```json
+{
+  "_id": "ObjectId",
+  "itemId": "ObjectId (reference to items)",
+  "variantSku": "ITEM-001-L-RED",
+  "variantName": "Large Red",
+  "attributes": {
+    "size": "L",
+    "color": "Red"
+  },
+  "priceAdjustment": 5.00,
+  "isActive": true,
+  "createdAt": 1699704000000,
+  "updatedAt": 1699704000000
+}
 ```
 
-**Note**: Final price for variant = item.base_price + variant.price_adjustment
+**Note**: `createdAt` and `updatedAt` are stored as Long (Epoch timestamp in milliseconds)
+
+**Indexes:**
+```javascript
+db.variants.createIndex({ "itemId": 1 })
+db.variants.createIndex({ "variantSku": 1 }, { unique: true })
+db.variants.createIndex({ "isActive": 1 })
+db.variants.createIndex({ "attributes": 1 })
+```
+
+**Note**: Final price for variant = item.basePrice + variant.priceAdjustment
 
 #### **stock**
 Tracks inventory levels for items and their variants.
 
-```sql
-CREATE TABLE stock (
-    id              BIGSERIAL PRIMARY KEY,
-    item_id         BIGINT NOT NULL,
-    variant_id      BIGINT,  -- NULL means stock for item without variant
-    quantity        INTEGER NOT NULL DEFAULT 0,
-    reserved_quantity INTEGER NOT NULL DEFAULT 0,  -- For pending orders
-    warehouse_location VARCHAR(100),
-    last_restocked_at TIMESTAMP,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_stock_item FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
-    CONSTRAINT fk_stock_variant FOREIGN KEY (variant_id) REFERENCES variants(id) ON DELETE CASCADE,
-    CONSTRAINT chk_quantity_non_negative CHECK (quantity >= 0),
-    CONSTRAINT chk_reserved_non_negative CHECK (reserved_quantity >= 0),
-    CONSTRAINT chk_reserved_not_exceed_quantity CHECK (reserved_quantity <= quantity),
-    CONSTRAINT uq_stock_item_variant UNIQUE (item_id, variant_id)
-);
-
-CREATE INDEX idx_stock_item_id ON stock(item_id);
-CREATE INDEX idx_stock_variant_id ON stock(variant_id);
-CREATE INDEX idx_stock_quantity ON stock(quantity) WHERE quantity > 0;
+```json
+{
+  "_id": "ObjectId",
+  "itemId": "ObjectId (reference to items)",
+  "variantId": "ObjectId (reference to variants, null if no variant)",
+  "quantity": 100,
+  "reservedQuantity": 20,
+  "warehouseLocation": "A-01-05",
+  "lastRestockedAt": 1699704000000,
+  "createdAt": 1699704000000,
+  "updatedAt": 1699704000000
+}
 ```
 
-**Available quantity** = quantity - reserved_quantity
+**Note**: `lastRestockedAt`, `createdAt`, and `updatedAt` are stored as Long (Epoch timestamp in milliseconds)
+
+**Indexes:**
+```javascript
+db.stock.createIndex({ "itemId": 1, "variantId": 1 }, { unique: true })
+db.stock.createIndex({ "itemId": 1 })
+db.stock.createIndex({ "variantId": 1 })
+db.stock.createIndex({ "quantity": 1 })
+```
+
+**Available quantity** = quantity - reservedQuantity
 
 #### **stock_movements**
 Audit trail for stock changes.
 
-```sql
-CREATE TABLE stock_movements (
-    id              BIGSERIAL PRIMARY KEY,
-    stock_id        BIGINT NOT NULL,
-    movement_type   VARCHAR(50) NOT NULL,  -- IN, OUT, ADJUSTMENT, RESERVATION, RELEASE
-    quantity        INTEGER NOT NULL,
-    previous_quantity INTEGER NOT NULL,
-    new_quantity    INTEGER NOT NULL,
-    reference_number VARCHAR(100),
-    notes           TEXT,
-    created_by      VARCHAR(100),
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_movement_stock FOREIGN KEY (stock_id) REFERENCES stock(id) ON DELETE CASCADE
-);
+```json
+{
+  "_id": "ObjectId",
+  "stockId": "ObjectId (reference to stock)",
+  "movementType": "IN",
+  "quantity": 50,
+  "previousQuantity": 100,
+  "newQuantity": 150,
+  "referenceNumber": "PO-2024-001",
+  "notes": "Restock from supplier",
+  "createdBy": "admin",
+  "createdAt": 1699704000000
+}
+```
 
-CREATE INDEX idx_stock_movements_stock_id ON stock_movements(stock_id);
-CREATE INDEX idx_stock_movements_type ON stock_movements(movement_type);
-CREATE INDEX idx_stock_movements_created_at ON stock_movements(created_at);
+**Note**: `createdAt` is stored as Long (Epoch timestamp in milliseconds)
+
+**Indexes:**
+```javascript
+db.stock_movements.createIndex({ "stockId": 1 })
+db.stock_movements.createIndex({ "movementType": 1 })
+db.stock_movements.createIndex({ "createdAt": -1 })
+db.stock_movements.createIndex({ "referenceNumber": 1 })
 ```
 
 ### 1.2 Database Relationships
 
 ```
-items (1) ----< (N) variants
-items (1) ----< (N) stock
-variants (1) ----< (N) stock
-stock (1) ----< (N) stock_movements
+items (1) ----< (N) variants (referenced by itemId)
+items (1) ----< (N) stock (referenced by itemId)
+variants (1) ----< (N) stock (referenced by variantId)
+stock (1) ----< (N) stock_movements (referenced by stockId)
 ```
+
+**Note**: MongoDB uses document references instead of foreign keys. Application-level referential integrity must be maintained.
 
 ---
 
@@ -132,10 +168,13 @@ io.github.edmaputra.cpwarehouse.domain.entity
 
 **Key Design Decisions**:
 - Use Lombok for boilerplate reduction (@Data, @Builder, @NoArgsConstructor, @AllArgsConstructor)
-- Use JPA annotations (@Entity, @Table, @Id, @GeneratedValue)
-- Implement soft delete using `is_active` flag where applicable
-- Add @PreUpdate annotation for automatic `updated_at` timestamp updates
-- Use @JsonIgnore for bidirectional relationships to avoid serialization issues
+- Use Spring Data MongoDB annotations (@Document, @Id, @Indexed, @DBRef)
+- Use `String` with ObjectId for `_id` fields or use `ObjectId` type directly
+- Implement soft delete using `isActive` flag where applicable
+- Use `Long` type for timestamp fields (`createdAt`, `updatedAt`, `lastRestockedAt`) to store Epoch time in milliseconds
+- Manually manage timestamps using `System.currentTimeMillis()` or use lifecycle callbacks
+- Use `@DBRef` for document references (optional, can use manual reference with String IDs)
+- Consider embedded documents vs references based on access patterns
 
 ### 2.2 DTOs (Data Transfer Objects)
 
@@ -541,7 +580,7 @@ io.github.edmaputra.cpwarehouse
 
 ```json
 {
-  "timestamp": "2025-11-11T10:30:00Z",
+  "timestamp": 1699704600000,
   "status": 404,
   "error": "Not Found",
   "message": "Item with ID 123 not found",
@@ -549,25 +588,27 @@ io.github.edmaputra.cpwarehouse
 }
 ```
 
+**Note**: `timestamp` is in Epoch milliseconds format
+
 ---
 
 ## 7. Implementation Phases
 
 ### Phase 1: Database Setup
-1. Add Spring Data JPA dependency to pom.xml
-2. Configure PostgreSQL connection in application.yaml
-3. Create Liquibase changelog files:
-   - `db/changelog/changelog-001-create-items-table.yaml`
-   - `db/changelog/changelog-002-create-variants-table.yaml`
-   - `db/changelog/changelog-003-create-stock-table.yaml`
-   - `db/changelog/changelog-004-create-stock-movements-table.yaml`
-   - `db/changelog/db.changelog-master.yaml` (master file)
-4. Test database migrations
+1. Add Spring Data MongoDB dependency to pom.xml
+2. Configure MongoDB connection in application.yaml
+3. Create MongoDB initialization scripts (optional):
+   - `db/init/001-create-indexes.js`
+   - `db/init/002-create-validators.js`
+   - `db/init/003-seed-data.js` (for development)
+4. Test database connection and indexes
+5. Configure MongoDB indexes programmatically using `@Indexed` annotations or `MongoTemplate`
 
 ### Phase 2: Domain Model
-1. Create entity classes (Item, Variant, Stock, StockMovement)
-2. Create repository interfaces
-3. Write unit tests for entities
+1. Create document classes with @Document annotation (Item, Variant, Stock, StockMovement)
+2. Create repository interfaces extending MongoRepository
+3. Add indexes using @Indexed annotations
+4. Write unit tests for entities
 
 ### Phase 3: DTOs and Mappers
 1. Create request DTOs with validation annotations
@@ -593,10 +634,11 @@ io.github.edmaputra.cpwarehouse
    - Stock reservation logic
    - Stock movement tracking
    - Availability checks
-2. Implement transactional operations with @Transactional
-3. Add pessimistic locking for concurrent stock updates
-4. Write comprehensive unit tests
-5. Write integration tests for concurrent scenarios
+2. Implement transactional operations with @Transactional (MongoDB 4.0+ with replica set)
+3. Use optimistic locking with @Version annotation for concurrent stock updates
+4. Implement retry logic for optimistic lock failures
+5. Write comprehensive unit tests
+6. Write integration tests for concurrent scenarios
 
 ### Phase 7: REST Controllers
 1. Implement ItemController
@@ -612,7 +654,7 @@ io.github.edmaputra.cpwarehouse
 3. Test error scenarios
 
 ### Phase 9: Testing & Documentation
-1. Integration tests for complete flows
+1. Integration tests for complete flows using embedded MongoDB (Flapdoodle)
 2. API documentation (OpenAPI/Swagger)
 3. Add README with API usage examples
 4. Performance testing for stock operations
@@ -631,10 +673,10 @@ io.github.edmaputra.cpwarehouse
 Add to `pom.xml`:
 
 ```xml
-<!-- Spring Data JPA -->
+<!-- Spring Data MongoDB -->
 <dependency>
     <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-data-jpa</artifactId>
+    <artifactId>spring-boot-starter-data-mongodb</artifactId>
 </dependency>
 
 <!-- Validation -->
@@ -643,7 +685,7 @@ Add to `pom.xml`:
     <artifactId>spring-boot-starter-validation</artifactId>
 </dependency>
 
-<!-- MapStruct for DTO mapping -->
+<!-- MapStruct for DTO mapping (Optional) -->
 <dependency>
     <groupId>org.mapstruct</groupId>
     <artifactId>mapstruct</artifactId>
@@ -662,6 +704,14 @@ Add to `pom.xml`:
     <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
     <version>2.3.0</version>
 </dependency>
+
+<!-- Embedded MongoDB for Testing -->
+<dependency>
+    <groupId>de.flapdoodle.embed</groupId>
+    <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
+    <version>4.9.2</version>
+    <scope>test</scope>
+</dependency>
 ```
 
 ---
@@ -675,29 +725,17 @@ spring:
   application:
     name: cpwarehouse
   
-  datasource:
-    url: jdbc:postgresql://localhost:5432/cpwarehouse_db
-    username: ${DB_USERNAME:cpwarehouse}
-    password: ${DB_PASSWORD:cpwarehouse}
-    driver-class-name: org.postgresql.Driver
-  
-  jpa:
-    hibernate:
-      ddl-auto: validate  # Let Liquibase handle schema
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-        jdbc:
-          batch_size: 20
-        order_inserts: true
-        order_updates: true
-  
-  liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
-    enabled: true
-    drop-first: false
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/cpwarehouse_db}
+      # Alternative configuration:
+      # host: ${MONGODB_HOST:localhost}
+      # port: ${MONGODB_PORT:27017}
+      # database: ${MONGODB_DATABASE:cpwarehouse_db}
+      # username: ${MONGODB_USERNAME:}
+      # password: ${MONGODB_PASSWORD:}
+      # authentication-database: admin
+      auto-index-creation: true  # Automatically create indexes from @Indexed annotations
 
 # Pagination defaults
 application:
@@ -716,15 +754,33 @@ springdoc:
 logging:
   level:
     io.github.edmaputra.cpwarehouse: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 ```
 
 ### 9.2 Environment-Specific Configs
 
-- `application-dev.yaml` - Development settings
-- `application-test.yaml` - Test settings with H2 in-memory DB
-- `application-prod.yaml` - Production settings
+- `application-dev.yaml` - Development settings (local MongoDB)
+- `application-test.yaml` - Test settings with embedded MongoDB (Flapdoodle)
+- `application-prod.yaml` - Production settings (MongoDB Atlas or production cluster)
+
+**Example application-test.yaml:**
+```yaml
+spring:
+  data:
+    mongodb:
+      # Embedded MongoDB will be used automatically for tests with Flapdoodle dependency
+      uri: mongodb://localhost:27017/cpwarehouse_test_db
+```
+
+**Example application-prod.yaml:**
+```yaml
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}  # Use environment variable for production
+      # For MongoDB Atlas:
+      # uri: mongodb+srv://<username>:<password>@cluster.mongodb.net/cpwarehouse_db?retryWrites=true&w=majority
+```
 
 ---
 
@@ -737,10 +793,10 @@ logging:
 - Target: 80%+ code coverage
 
 ### 10.2 Integration Tests
-- Test complete flows with real database (TestContainers)
-- Test concurrent stock operations
-- Test transactional behavior
-- Test Liquibase migrations
+- Test complete flows with embedded MongoDB (Flapdoodle)
+- Test concurrent stock operations with optimistic locking
+- Test transactional behavior (requires MongoDB replica set)
+- Test index creation and queries
 
 ### 10.3 API Tests
 - Test REST endpoints with MockMvc
@@ -749,8 +805,10 @@ logging:
 - Test pagination and filtering
 
 ### 10.4 Test Data
-- Use Liquibase for test data seeding
+- Use @BeforeEach methods to seed test data
 - Create fixtures for common test scenarios
+- Use test data builders or factories
+- Clean up test data with @AfterEach or use embedded MongoDB per test class
 
 ---
 
@@ -768,12 +826,17 @@ While not required initially, consider these for production:
 
 ## 12. Performance Optimization
 
-1. **Database Indexes**: Already defined in schema
-2. **Connection Pooling**: Configure HikariCP
+1. **Database Indexes**: Use @Indexed annotations and compound indexes for frequently queried fields
+2. **Connection Pooling**: Configure MongoDB connection pool settings
 3. **Caching**: Redis for frequently accessed items
-4. **Batch Operations**: Use JPA batch inserts/updates
-5. **Pessimistic Locking**: For stock updates to prevent race conditions
-6. **Query Optimization**: Use fetch joins to avoid N+1 queries
+4. **Batch Operations**: Use MongoTemplate bulkOps for batch inserts/updates
+5. **Optimistic Locking**: Use @Version annotation for stock updates to prevent race conditions
+6. **Query Optimization**: 
+   - Use projection to fetch only required fields
+   - Use aggregation pipelines for complex queries
+   - Avoid fetching large embedded arrays
+7. **Sharding**: Consider sharding strategy for horizontal scaling (if needed)
+8. **Read Preference**: Configure read preference for replica sets (primary, secondary, etc.)
 
 ---
 
@@ -825,10 +888,12 @@ While not required initially, consider these for production:
       "available": 5
     }
   },
-  "timestamp": "2025-11-11T10:30:00Z",
+  "timestamp": 1699704600000,
   "path": "/api/v1/stock/1/reserve"
 }
 ```
+
+**Note**: All timestamps in API responses use Epoch milliseconds format (Long)
 
 ---
 
@@ -847,7 +912,7 @@ After approval of this plan:
 
 ## 16. Assumptions
 
-1. PostgreSQL database is available and accessible
+1. MongoDB 4.0+ is available and accessible (4.0+ required for multi-document transactions)
 2. Using Spring Boot 3.5.7 with Java 21
 3. RESTful API follows JSON format
 4. Stock operations require immediate consistency (not eventual)
@@ -855,10 +920,52 @@ After approval of this plan:
 6. Prices in single currency (can be extended)
 7. No authentication/authorization initially
 8. Basic error handling sufficient for MVP
+9. MongoDB replica set configuration for transactions (single node replica set acceptable for development)
+10. Document size limits (16MB per document) are sufficient for our use cases
 
 ---
 
-## 17. Out of Scope (For Now)
+## 17. MongoDB-Specific Considerations
+
+### 17.1 Transaction Support
+- MongoDB transactions require a replica set (even single-node replica set for development)
+- Use `@Transactional` for multi-document operations
+- Consider compensating transactions for cross-collection operations
+- Handle `TransientTransactionError` with retry logic
+
+### 17.2 Schema Design Choices
+
+**Document References vs Embedding:**
+- **Items & Variants**: Use separate collections with references (easier to query and update)
+- **Stock & Items/Variants**: Use references (normalized approach for flexibility)
+- **Stock Movements**: Separate collection with reference to stock (audit trail)
+
+**Alternative Embedded Approach** (for consideration):
+- Could embed variants within items document for read-heavy workloads
+- Could embed recent stock movements within stock document
+
+### 17.3 Index Strategy
+- Create compound indexes for common query patterns
+- Use text indexes for search functionality
+- Monitor index usage with `explain()` plans
+- Avoid over-indexing (impacts write performance)
+
+### 17.4 Data Migration from PostgreSQL
+If migrating from existing PostgreSQL data:
+1. Export data to JSON/CSV
+2. Transform data structure (snake_case to camelCase, BIGSERIAL to ObjectId)
+3. Import using mongoimport or custom migration scripts
+4. Validate data integrity
+5. Test application functionality
+
+### 17.5 Backup Strategy
+- Use mongodump/mongorestore for backups
+- Consider MongoDB Atlas automated backups
+- Point-in-time recovery for production
+
+---
+
+## 18. Out of Scope (For Now)
 
 1. User authentication and authorization
 2. Multi-warehouse support
@@ -870,5 +977,8 @@ After approval of this plan:
 8. Bulk import/export functionality
 9. Image upload for items
 10. Shopping cart functionality
+11. MongoDB Change Streams for real-time updates
+12. Geospatial queries for warehouse locations
+13. Time-series data for stock movement analytics
 
 These can be added in future iterations based on requirements.

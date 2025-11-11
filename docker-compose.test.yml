@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: cpwarehouse-mongodb-test
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: cpwarehouse_test_user
+      MONGO_INITDB_ROOT_PASSWORD: cpwarehouse_test_pass
+      MONGO_INITDB_DATABASE: cpwarehouse_test
+    volumes:
+      - mongodb-test-data:/data/db
+      - ./src/test/resources/db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/cpwarehouse_test -u cpwarehouse_test_user -p cpwarehouse_test_pass --authenticationDatabase cpwarehouse_test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  mongodb-test-data:
+    driver: local
