@@ -1,3 +1,14 @@
 spring:
-  application:
-    name: cpwarehouse
+  data:
+    mongodb:
+      # This will be overridden by Testcontainers when running with Docker
+      # For local test MongoDB (docker-compose.test.yml), use port 27018
+      uri: ${MONGODB_URI:mongodb://cpwarehouse_test_user:cpwarehouse_test_pass@localhost:27018/cpwarehouse_test?authSource=cpwarehouse_test}
+      auto-index-creation: true
+
+# Logging for tests
+logging:
+  level:
+    io.github.edmaputra.cpwarehouse: DEBUG
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    org.testcontainers: INFO
