@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +34,10 @@ public class VariantRepositoryCustomImpl implements VariantRepositoryCustom {
 
     log.debug("Finding variants with filters - itemId: {}, isActive: {}, search: {}", itemId, isActive, search);
 
-    Query query = new Query();
     List<Criteria> criteria = new ArrayList<>();
 
     // Filter by item ID
-    if (itemId != null && !itemId.isBlank()) {
+    if (StringUtils.hasText(itemId)) {
       criteria.add(Criteria.where("itemId").is(itemId));
     }
 
@@ -46,7 +47,7 @@ public class VariantRepositoryCustomImpl implements VariantRepositoryCustom {
     }
 
     // Search in variantSku or variantName (case-insensitive regex)
-    if (search != null && !search.isBlank()) {
+    if (StringUtils.hasText(search)) {
       Pattern pattern = Pattern.compile(search, Pattern.CASE_INSENSITIVE);
       Criteria searchCriteria = new Criteria().orOperator(
           Criteria.where("variantSku").regex(pattern),
@@ -56,7 +57,8 @@ public class VariantRepositoryCustomImpl implements VariantRepositoryCustom {
     }
 
     // Combine all criteria
-    if (!criteria.isEmpty()) {
+    Query query = new Query();
+    if (!CollectionUtils.isEmpty(criteria)) {
       query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[0])));
     }
 

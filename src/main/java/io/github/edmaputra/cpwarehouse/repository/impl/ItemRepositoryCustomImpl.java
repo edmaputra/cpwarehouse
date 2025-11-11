@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +37,6 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
         pageable.getPageSize());
 
     // Build dynamic query
-    Query query = new Query();
     List<Criteria> criteriaList = new ArrayList<>();
 
     // Add active filter if specified
@@ -45,7 +46,7 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     }
 
     // Add search filter if specified
-    if (search != null && !search.isBlank()) {
+    if (StringUtils.hasText(search)) {
       // Search in both name and SKU fields (case-insensitive)
       Criteria searchCriteria = new Criteria().orOperator(Criteria.where("name").regex(search, "i"),
           Criteria.where("sku").regex(search, "i"));
@@ -54,7 +55,8 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom {
     }
 
     // Combine all criteria with AND
-    if (!criteriaList.isEmpty()) {
+    Query query = new Query();
+    if (!CollectionUtils.isEmpty(criteriaList)) {
       query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
     }
 
