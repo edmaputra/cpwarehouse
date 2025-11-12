@@ -84,6 +84,23 @@ public class GlobalExceptionHandler {
   }
 
   /**
+   * Handle InvalidPaymentException.
+   */
+  @ExceptionHandler(InvalidPaymentException.class)
+  public ResponseEntity<ApiResponse<Void>> handleInvalidPaymentException(InvalidPaymentException ex,
+      HttpServletRequest request) {
+
+    ApiResponse.ErrorDetail errorDetail = ApiResponse.ErrorDetail.builder()
+        .code("INVALID_PAYMENT")
+        .message(ex.getMessage())
+        .timestamp(System.currentTimeMillis())
+        .path(request.getRequestURI())
+        .build();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(errorDetail));
+  }
+
+  /**
    * Handle validation errors from @Valid annotation.
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
