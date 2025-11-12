@@ -1,7 +1,6 @@
 package io.github.edmaputra.cpwarehouse.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.edmaputra.cpwarehouse.dto.request.ItemCreateRequest;
 import io.github.edmaputra.cpwarehouse.dto.request.VariantCreateRequest;
 import io.github.edmaputra.cpwarehouse.dto.request.VariantUpdateRequest;
 import io.github.edmaputra.cpwarehouse.repository.ItemRepository;
@@ -31,34 +30,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration tests for VariantController.
- */
-@SpringBootTest
-@AutoConfigureMockMvc
-    //@Testcontainers
-class VariantControllerIntegrationTest {
-
-  //    @Container
-  //    static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0"))
-  //            .withExposedPorts(27017);
-
-  //    @DynamicPropertySource
-  //    static void setProperties(DynamicPropertyRegistry registry) {
-  //        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-  //    }
-
-  @Autowired
-  MockMvc mockMvc;
-
-  @Autowired
-  ObjectMapper objectMapper;
+class VariantControllerIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   ItemRepository itemRepository;
 
   @Autowired
   VariantRepository variantRepository;
+  
+  @Autowired
+  TestHelper testHelper;
 
   @BeforeEach
   void setUp() {
@@ -77,7 +58,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithValidRequest_ShouldReturnCreatedVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     VariantCreateRequest request = VariantCreateRequest.builder()
         .itemId(itemId)
@@ -111,7 +92,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithDuplicateSku_ShouldReturnConflict() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     VariantCreateRequest firstRequest = VariantCreateRequest.builder()
         .itemId(itemId)
@@ -170,7 +151,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithInactiveItem_ShouldReturnBadRequest() throws Exception {
     // Given - Create item and soft delete it
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     mockMvc.perform(delete("/api/v1/items/" + itemId)).andExpect(status().isNoContent());
 
@@ -195,7 +176,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithNegativeFinalPrice_ShouldReturnBadRequest() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("10.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("10.00"));
 
     VariantCreateRequest request = VariantCreateRequest.builder()
         .itemId(itemId)
@@ -218,7 +199,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithInvalidSku_ShouldReturnBadRequest() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     VariantCreateRequest request =
         VariantCreateRequest.builder()
@@ -242,7 +223,7 @@ class VariantControllerIntegrationTest {
   @Test
   void createVariant_WithNullPriceAdjustment_ShouldUseZeroAdjustment() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     VariantCreateRequest request = VariantCreateRequest.builder()
         .itemId(itemId)
@@ -267,7 +248,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getVariantsByItemId_WithMultipleVariants_ShouldReturnAllVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     createTestVariant(itemId, "VAR-001", "Red Variant", new BigDecimal("10.00"));
     createTestVariant(itemId, "VAR-002", "Blue Variant", new BigDecimal("15.00"));
     createTestVariant(itemId, "VAR-003", "Green Variant", new BigDecimal("20.00"));
@@ -283,7 +264,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getVariantsByItemId_WithNoVariants_ShouldReturnEmptyList() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
 
     // When & Then
     mockMvc.perform(get("/api/v1/items/" + itemId + "/variants"))
@@ -297,8 +278,8 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithPagination_ShouldReturnPagedVariants() throws Exception {
     // Given
-    String item1Id = createTestItem("ITEM-001", "Item 1", new BigDecimal("100.00"));
-    String item2Id = createTestItem("ITEM-002", "Item 2", new BigDecimal("200.00"));
+    String item1Id = testHelper.createTestItem("ITEM-001", "Item 1", new BigDecimal("100.00"));
+    String item2Id = testHelper.createTestItem("ITEM-002", "Item 2", new BigDecimal("200.00"));
 
     createTestVariant(item1Id, "VAR-001", "Variant 1", new BigDecimal("10.00"));
     createTestVariant(item1Id, "VAR-002", "Variant 2", new BigDecimal("20.00"));
@@ -317,8 +298,8 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithItemIdFilter_ShouldReturnFilteredVariants() throws Exception {
     // Given
-    String item1Id = createTestItem("ITEM-001", "Item 1", new BigDecimal("100.00"));
-    String item2Id = createTestItem("ITEM-002", "Item 2", new BigDecimal("200.00"));
+    String item1Id = testHelper.createTestItem("ITEM-001", "Item 1", new BigDecimal("100.00"));
+    String item2Id = testHelper.createTestItem("ITEM-002", "Item 2", new BigDecimal("200.00"));
 
     createTestVariant(item1Id, "VAR-001", "Variant 1", new BigDecimal("10.00"));
     createTestVariant(item1Id, "VAR-002", "Variant 2", new BigDecimal("20.00"));
@@ -335,7 +316,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithSearchTerm_ShouldReturnMatchingVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     createTestVariant(itemId, "VAR-001", "Red Variant", new BigDecimal("10.00"));
     createTestVariant(itemId, "VAR-002", "Blue Variant", new BigDecimal("20.00"));
     createTestVariant(itemId, "VAR-003", "Red Special", new BigDecimal("30.00"));
@@ -352,7 +333,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithIsActiveTrue_ShouldReturnOnlyActiveVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variant1Id = createTestVariant(itemId, "VAR-001", "Active Variant 1", new BigDecimal("10.00"));
     String variant2Id = createTestVariant(itemId, "VAR-002", "Active Variant 2", new BigDecimal("20.00"));
     String variant3Id = createTestVariant(itemId, "VAR-003", "Inactive Variant", new BigDecimal("30.00"));
@@ -373,7 +354,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithIsActiveFalse_ShouldReturnOnlyInactiveVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variant1Id = createTestVariant(itemId, "VAR-001", "Active Variant", new BigDecimal("10.00"));
     String variant2Id = createTestVariant(itemId, "VAR-002", "Inactive Variant 1", new BigDecimal("20.00"));
     String variant3Id = createTestVariant(itemId, "VAR-003", "Inactive Variant 2", new BigDecimal("30.00"));
@@ -395,7 +376,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getVariantById_WithExistingId_ShouldReturnVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("10.00"));
 
     // When & Then
@@ -411,7 +392,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getVariantBySku_WithExistingSku_ShouldReturnVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("10.00"));
 
     // When & Then
@@ -426,7 +407,7 @@ class VariantControllerIntegrationTest {
   @Test
   void updateVariant_WithValidRequest_ShouldReturnUpdatedVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Original Name", new BigDecimal("10.00"));
 
     VariantUpdateRequest updateRequest = VariantUpdateRequest.builder()
@@ -470,7 +451,7 @@ class VariantControllerIntegrationTest {
   @Test
   void updateVariant_WithNegativeFinalPrice_ShouldReturnBadRequest() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("10.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("10.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("5.00"));
 
     VariantUpdateRequest updateRequest =
@@ -490,7 +471,7 @@ class VariantControllerIntegrationTest {
   @Test
   void updateVariant_WithNullPriceAdjustment_ShouldKeepCurrentAdjustment() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("20.00"));
 
     VariantUpdateRequest updateRequest = VariantUpdateRequest.builder()
@@ -512,7 +493,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithSortingAsc_ShouldReturnSortedVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     createTestVariant(itemId, "VAR-003", "Zebra Variant", new BigDecimal("30.00"));
     createTestVariant(itemId, "VAR-001", "Alpha Variant", new BigDecimal("10.00"));
     createTestVariant(itemId, "VAR-002", "Beta Variant", new BigDecimal("20.00"));
@@ -533,7 +514,7 @@ class VariantControllerIntegrationTest {
   @Test
   void getAllVariants_WithSortingDesc_ShouldReturnSortedVariants() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     createTestVariant(itemId, "VAR-001", "Variant A", new BigDecimal("10.00"));
     createTestVariant(itemId, "VAR-002", "Variant B", new BigDecimal("30.00"));
     createTestVariant(itemId, "VAR-003", "Variant C", new BigDecimal("20.00"));
@@ -554,7 +535,7 @@ class VariantControllerIntegrationTest {
   @Test
   void deleteVariant_WithExistingId_ShouldSoftDeleteVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("10.00"));
 
     // When & Then
@@ -569,7 +550,7 @@ class VariantControllerIntegrationTest {
   @Test
   void hardDeleteVariant_WithExistingId_ShouldPermanentlyDeleteVariant() throws Exception {
     // Given
-    String itemId = createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
+    String itemId = testHelper.createTestItem("ITEM-001", "Test Item", new BigDecimal("100.00"));
     String variantId = createTestVariant(itemId, "VAR-001", "Test Variant", new BigDecimal("10.00"));
 
     // When & Then
@@ -593,27 +574,6 @@ class VariantControllerIntegrationTest {
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"));
-  }
-
-  /**
-   * Helper method to create a test item.
-   */
-  private String createTestItem(String sku, String name, BigDecimal basePrice) throws Exception {
-    ItemCreateRequest request = ItemCreateRequest.builder()
-        .sku(sku)
-        .name(name)
-        .description("Test description for " + name)
-        .basePrice(basePrice)
-        .build();
-
-    MvcResult result = mockMvc.perform(post("/api/v1/items").contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated()).andReturn();
-
-    String responseContent = result.getResponse().getContentAsString();
-
-    // Parse the response to extract the item ID
-    com.fasterxml.jackson.databind.JsonNode jsonNode = objectMapper.readTree(responseContent);
-    return jsonNode.get("data").get("id").asText();
   }
 
   /**
