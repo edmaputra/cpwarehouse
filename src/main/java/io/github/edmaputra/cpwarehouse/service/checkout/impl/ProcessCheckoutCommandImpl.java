@@ -1,8 +1,8 @@
 package io.github.edmaputra.cpwarehouse.service.checkout.impl;
 
 import io.github.edmaputra.cpwarehouse.common.CommandExecutor;
+import io.github.edmaputra.cpwarehouse.common.CommonRetryable;
 import io.github.edmaputra.cpwarehouse.domain.entity.CheckoutItem;
-import io.github.edmaputra.cpwarehouse.domain.entity.Stock;
 import io.github.edmaputra.cpwarehouse.dto.request.CheckoutRequest;
 import io.github.edmaputra.cpwarehouse.dto.request.StockReserveRequest;
 import io.github.edmaputra.cpwarehouse.dto.response.CheckoutResponse;
@@ -13,7 +13,6 @@ import io.github.edmaputra.cpwarehouse.exception.InsufficientStockException;
 import io.github.edmaputra.cpwarehouse.exception.ResourceNotFoundException;
 import io.github.edmaputra.cpwarehouse.mapper.CheckoutMapper;
 import io.github.edmaputra.cpwarehouse.repository.CheckoutItemRepository;
-import io.github.edmaputra.cpwarehouse.repository.StockRepository;
 import io.github.edmaputra.cpwarehouse.service.checkout.ProcessCheckoutCommand;
 import io.github.edmaputra.cpwarehouse.service.item.GetItemByIdCommand;
 import io.github.edmaputra.cpwarehouse.service.stock.GetStockByItemAndVariantCommand;
@@ -22,9 +21,6 @@ import io.github.edmaputra.cpwarehouse.service.stock.ReserveStockCommand;
 import io.github.edmaputra.cpwarehouse.service.variant.GetVariantByIdCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,21 +36,12 @@ import java.math.BigDecimal;
 public class ProcessCheckoutCommandImpl implements ProcessCheckoutCommand {
 
     private final CheckoutItemRepository checkoutItemRepository;
-    private final StockRepository stockRepository;
     private final CheckoutMapper checkoutMapper;
     private final CommandExecutor commandExecutor;
 
     @Override
     @Transactional
-    @Retryable(
-            retryFor = OptimisticLockingFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(
-                    delay = 100,
-                    multiplier = 2,
-                    maxDelay = 800
-            )
-    )
+    @CommonRetryable
     public CheckoutResponse execute(Request request) {
         CheckoutRequest checkoutRequest = request.checkoutRequest();
 

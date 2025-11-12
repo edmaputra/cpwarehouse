@@ -10,9 +10,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.PaymentResponse;
  */
 public interface ProcessPaymentCommand extends Command<ProcessPaymentCommand.Request, PaymentResponse> {
 
-  /**
-   * Request wrapper for payment with checkout ID.
-   */
-  record Request(String checkoutId, PaymentRequest paymentRequest) {
-  }
+    /**
+     * Request wrapper for payment with checkout ID.
+     */
+    record Request(String checkoutId, PaymentRequest paymentRequest) {
+    }
 }

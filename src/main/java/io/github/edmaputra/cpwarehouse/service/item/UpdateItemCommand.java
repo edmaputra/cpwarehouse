@@ -10,9 +10,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.ItemResponse;
  */
 public interface UpdateItemCommand extends Command<UpdateItemCommand.Request, ItemResponse> {
 
-  /**
-   * Request wrapper for update operation.
-   */
-  record Request(String id, ItemUpdateRequest updateRequest) {
-  }
+    /**
+     * Request wrapper for update operation.
+     */
+    record Request(String id, ItemUpdateRequest updateRequest) {
+    }
 }

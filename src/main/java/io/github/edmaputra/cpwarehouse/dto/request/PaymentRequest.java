@@ -20,14 +20,14 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class PaymentRequest {
 
-  @NotNull(message = "Payment amount is required")
-  @DecimalMin(value = "0.01", message = "Payment amount must be greater than 0")
-  private BigDecimal paymentAmount;
+    @NotNull(message = "Payment amount is required")
+    @DecimalMin(value = "0.01", message = "Payment amount must be greater than 0")
+    private BigDecimal paymentAmount;
 
-  @Size(max = 100, message = "Payment reference must not exceed 100 characters")
-  private String paymentReference;
+    @Size(max = 100, message = "Payment reference must not exceed 100 characters")
+    private String paymentReference;
 
-  @NotNull(message = "Processed by is required")
-  @Size(max = 100, message = "Processed by must not exceed 100 characters")
-  private String processedBy;
+    @NotNull(message = "Processed by is required")
+    @Size(max = 100, message = "Processed by must not exceed 100 characters")
+    private String processedBy;
 }

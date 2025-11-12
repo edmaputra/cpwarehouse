@@ -20,19 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetVariantBySkuCommandImpl implements GetVariantBySkuCommand {
 
-  private final VariantRepository variantRepository;
-  private final VariantMapper variantMapper;
+    private final VariantRepository variantRepository;
+    private final VariantMapper variantMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public VariantResponse execute(String variantSku) {
-    log.info("Getting variant by SKU: {}", variantSku);
+    @Override
+    @Transactional(readOnly = true)
+    public VariantResponse execute(String variantSku) {
+        log.info("Getting variant by SKU: {}", variantSku);
 
-    Variant variant = variantRepository.findByVariantSku(variantSku)
-        .orElseThrow(() -> new ResourceNotFoundException("Variant", "SKU", variantSku));
+        Variant variant = variantRepository.findByVariantSku(variantSku)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "SKU", variantSku));
 
-    log.info("Found variant: {} with SKU: {}", variant.getId(), variant.getVariantSku());
+        log.info("Found variant: {} with SKU: {}", variant.getId(), variant.getVariantSku());
 
-    return variantMapper.toResponse(variant);
-  }
+        return variantMapper.toResponse(variant);
+    }
 }

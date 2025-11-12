@@ -6,8 +6,8 @@ package io.github.edmaputra.cpwarehouse.exception;
  */
 public class InsufficientStockException extends RuntimeException {
 
-  public InsufficientStockException(String stockId, Integer requested, Integer available) {
-    super(String.format("Insufficient stock for ID %s. Requested: %d, Available: %d", 
-        stockId, requested, available));
-  }
+    public InsufficientStockException(String stockId, Integer requested, Integer available) {
+        super(String.format("Insufficient stock for ID %s. Requested: %d, Available: %d",
+                stockId, requested, available));
+    }
 }

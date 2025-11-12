@@ -10,17 +10,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ ElementType.METHOD, ElementType.TYPE })
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Retryable(
-    retryFor = OptimisticLockingFailureException.class,
-    maxAttempts = 10,
-    backoff = @Backoff(
-        delay = 250,
-        multiplier = 2.0,
-        maxDelay = 10000
-    )
+        retryFor = OptimisticLockingFailureException.class,
+        maxAttempts = 5,
+        backoff = @Backoff(
+                delay = 250,
+                multiplier = 2.0,
+                maxDelay = 10000
+        )
 )
 public @interface CommonRetryable {
 }

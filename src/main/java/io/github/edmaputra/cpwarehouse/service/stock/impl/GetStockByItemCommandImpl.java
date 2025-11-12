@@ -22,20 +22,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GetStockByItemCommandImpl implements GetStockByItemCommand {
 
-  private final StockRepository stockRepository;
-  private final StockMapper stockMapper;
+    private final StockRepository stockRepository;
+    private final StockMapper stockMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<StockResponse> execute(String itemId) {
-    log.info("Getting stock for item: {}", itemId);
+    @Override
+    @Transactional(readOnly = true)
+    public List<StockResponse> execute(String itemId) {
+        log.info("Getting stock for item: {}", itemId);
 
-    List<Stock> stocks = stockRepository.findByItemId(itemId);
+        List<Stock> stocks = stockRepository.findByItemId(itemId);
 
-    log.info("Found {} stock record(s) for item: {}", stocks.size(), itemId);
+        log.info("Found {} stock record(s) for item: {}", stocks.size(), itemId);
 
-    return stocks.stream()
-        .map(stockMapper::toResponse)
-        .collect(Collectors.toList());
-  }
+        return stocks.stream()
+                .map(stockMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }

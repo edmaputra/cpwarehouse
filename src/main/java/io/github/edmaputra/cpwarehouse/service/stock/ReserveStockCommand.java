@@ -9,9 +9,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.StockResponse;
  */
 public interface ReserveStockCommand extends Command<ReserveStockCommand.Request, StockResponse> {
 
-  /**
-   * Request wrapper for stock reservation with stock ID.
-   */
-  record Request(String stockId, StockReserveRequest reserveRequest) {
-  }
+    /**
+     * Request wrapper for stock reservation with stock ID.
+     */
+    record Request(String stockId, StockReserveRequest reserveRequest) {
+    }
 }

@@ -20,19 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetVariantByIdCommandImpl implements GetVariantByIdCommand {
 
-  private final VariantRepository variantRepository;
-  private final VariantMapper variantMapper;
+    private final VariantRepository variantRepository;
+    private final VariantMapper variantMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public VariantResponse execute(String id) {
-    log.info("Getting variant by ID: {}", id);
+    @Override
+    @Transactional(readOnly = true)
+    public VariantResponse execute(String id) {
+        log.info("Getting variant by ID: {}", id);
 
-    Variant variant = variantRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
+        Variant variant = variantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
 
-    log.info("Found variant: {} with SKU: {}", variant.getId(), variant.getVariantSku());
+        log.info("Found variant: {} with SKU: {}", variant.getId(), variant.getVariantSku());
 
-    return variantMapper.toResponse(variant);
-  }
+        return variantMapper.toResponse(variant);
+    }
 }

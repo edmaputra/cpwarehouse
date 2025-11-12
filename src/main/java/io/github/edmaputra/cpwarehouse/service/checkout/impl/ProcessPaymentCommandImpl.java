@@ -1,6 +1,7 @@
 package io.github.edmaputra.cpwarehouse.service.checkout.impl;
 
 import io.github.edmaputra.cpwarehouse.common.CommandExecutor;
+import io.github.edmaputra.cpwarehouse.common.CommonRetryable;
 import io.github.edmaputra.cpwarehouse.domain.entity.CheckoutItem;
 import io.github.edmaputra.cpwarehouse.domain.entity.StockMovement;
 import io.github.edmaputra.cpwarehouse.dto.request.PaymentRequest;
@@ -18,9 +19,6 @@ import io.github.edmaputra.cpwarehouse.service.stock.GetStockMovementByIdCommand
 import io.github.edmaputra.cpwarehouse.service.stock.ReleaseStockCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,15 +36,7 @@ public class ProcessPaymentCommandImpl implements ProcessPaymentCommand {
 
     @Override
     @Transactional
-    @Retryable(
-            retryFor = OptimisticLockingFailureException.class,
-            maxAttempts = 5,
-            backoff = @Backoff(
-                    delay = 100,
-                    multiplier = 2,
-                    maxDelay = 800
-            )
-    )
+    @CommonRetryable
     public PaymentResponse execute(Request request) {
         PaymentRequest paymentRequest = request.paymentRequest();
 

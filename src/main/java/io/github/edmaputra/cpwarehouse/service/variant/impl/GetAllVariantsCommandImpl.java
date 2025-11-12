@@ -20,22 +20,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetAllVariantsCommandImpl implements GetAllVariantsCommand {
 
-  private final VariantRepository variantRepository;
-  private final VariantMapper variantMapper;
+    private final VariantRepository variantRepository;
+    private final VariantMapper variantMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public Page<VariantResponse> execute(Request request) {
-    log.info("Getting all variants - page: {}, size: {}, itemId: {}, isActive: {}, search: {}",
-        request.pageable().getPageNumber(), request.pageable().getPageSize(),
-        request.itemId(), request.isActive(), request.search());
+    @Override
+    @Transactional(readOnly = true)
+    public Page<VariantResponse> execute(Request request) {
+        log.info("Getting all variants - page: {}, size: {}, itemId: {}, isActive: {}, search: {}",
+                request.pageable().getPageNumber(), request.pageable().getPageSize(),
+                request.itemId(), request.isActive(), request.search());
 
-    Page<Variant> variantsPage = variantRepository.findAllWithFilters(
-        request.itemId(), request.isActive(), request.search(), request.pageable());
+        Page<Variant> variantsPage = variantRepository.findAllWithFilters(
+                request.itemId(), request.isActive(), request.search(), request.pageable());
 
-    log.info("Found {} variants out of {} total",
-        variantsPage.getNumberOfElements(), variantsPage.getTotalElements());
+        log.info("Found {} variants out of {} total",
+                variantsPage.getNumberOfElements(), variantsPage.getTotalElements());
 
-    return variantsPage.map(variantMapper::toResponse);
-  }
+        return variantsPage.map(variantMapper::toResponse);
+    }
 }

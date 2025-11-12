@@ -10,11 +10,11 @@ import org.mapstruct.ReportingPolicy;
  * Handles conversions between entity and response DTOs.
  */
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
+        nullValuePropertyMappingStrategy = org.mapstruct.NullValuePropertyMappingStrategy.IGNORE)
 public interface CheckoutMapper {
 
-  /**
-   * Convert CheckoutItem entity to CheckoutResponse DTO.
-   */
-  CheckoutResponse toResponse(CheckoutItem checkoutItem);
+    /**
+     * Convert CheckoutItem entity to CheckoutResponse DTO.
+     */
+    CheckoutResponse toResponse(CheckoutItem checkoutItem);
 }

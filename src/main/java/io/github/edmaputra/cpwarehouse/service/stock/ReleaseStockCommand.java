@@ -9,9 +9,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.StockResponse;
  */
 public interface ReleaseStockCommand extends Command<ReleaseStockCommand.Request, StockResponse> {
 
-  /**
-   * Request wrapper for stock release with stock ID.
-   */
-  record Request(String stockId, StockReleaseRequest releaseRequest) {
-  }
+    /**
+     * Request wrapper for stock release with stock ID.
+     */
+    record Request(String stockId, StockReleaseRequest releaseRequest) {
+    }
 }

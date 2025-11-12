@@ -20,16 +20,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetItemByIdCommandImpl implements GetItemByIdCommand {
 
-  private final ItemRepository itemRepository;
-  private final ItemMapper itemMapper;
+    private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public ItemDetailResponse execute(String id) {
-    log.info("Fetching item by ID: {}", id);
+    @Override
+    @Transactional(readOnly = true)
+    public ItemDetailResponse execute(String id) {
+        log.info("Fetching item by ID: {}", id);
 
-    Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
+        Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
 
-    return itemMapper.toDetailResponse(item);
-  }
+        return itemMapper.toDetailResponse(item);
+    }
 }

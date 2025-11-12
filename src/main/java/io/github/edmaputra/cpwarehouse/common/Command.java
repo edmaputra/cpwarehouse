@@ -9,11 +9,11 @@ package io.github.edmaputra.cpwarehouse.common;
  */
 public interface Command<R, T> {
 
-  /**
-   * Execute the command with the given request.
-   *
-   * @param request the request object
-   * @return the response object
-   */
-  T execute(R request);
+    /**
+     * Execute the command with the given request.
+     *
+     * @param request the request object
+     * @return the response object
+     */
+    T execute(R request);
 }

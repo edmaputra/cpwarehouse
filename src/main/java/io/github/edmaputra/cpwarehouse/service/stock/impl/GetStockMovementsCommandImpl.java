@@ -20,35 +20,35 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetStockMovementsCommandImpl implements GetStockMovementsCommand {
 
-  private final StockMovementRepository stockMovementRepository;
-  private final StockMapper stockMapper;
+    private final StockMovementRepository stockMovementRepository;
+    private final StockMapper stockMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public Page<StockMovementResponse> execute(Request request) {
-    log.info("Getting stock movements for stock: {}, movementType: {}, page: {}",
-        request.stockId(), request.movementType(), request.pageable().getPageNumber());
+    @Override
+    @Transactional(readOnly = true)
+    public Page<StockMovementResponse> execute(Request request) {
+        log.info("Getting stock movements for stock: {}, movementType: {}, page: {}",
+                request.stockId(), request.movementType(), request.pageable().getPageNumber());
 
-    Page<StockMovement> movements;
+        Page<StockMovement> movements;
 
-    if (request.movementType() != null) {
-      // Filter by movement type
-      movements = stockMovementRepository.findByStockIdAndMovementType(
-          request.stockId(),
-          request.movementType(),
-          request.pageable()
-      );
-    } else {
-      // Get all movements for stock
-      movements = stockMovementRepository.findByStockId(
-          request.stockId(),
-          request.pageable()
-      );
+        if (request.movementType() != null) {
+            // Filter by movement type
+            movements = stockMovementRepository.findByStockIdAndMovementType(
+                    request.stockId(),
+                    request.movementType(),
+                    request.pageable()
+            );
+        } else {
+            // Get all movements for stock
+            movements = stockMovementRepository.findByStockId(
+                    request.stockId(),
+                    request.pageable()
+            );
+        }
+
+        log.info("Found {} stock movement(s) for stock: {}",
+                movements.getTotalElements(), request.stockId());
+
+        return movements.map(stockMapper::toMovementResponse);
     }
-
-    log.info("Found {} stock movement(s) for stock: {}",
-        movements.getTotalElements(), request.stockId());
-
-    return movements.map(stockMapper::toMovementResponse);
-  }
 }

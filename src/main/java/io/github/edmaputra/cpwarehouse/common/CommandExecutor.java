@@ -16,26 +16,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CommandExecutor {
 
-  private final ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
-  /**
-   * Execute a command by retrieving it from the ApplicationContext and calling its execute method.
-   * The command can be an interface, and Spring will resolve the concrete implementation.
-   *
-   * @param commandClass the command interface/class to execute
-   * @param request      the request object to pass to the command
-   * @param <R>          the request type
-   * @param <T>          the response type
-   * @return the response from the command execution
-   * @throws RuntimeException if the command execution fails
-   */
-  public <R, T> T execute(Class<? extends Command<R, T>> commandClass, R request) throws RuntimeException {
-    log.debug("Executing command: {}", commandClass.getSimpleName());
+    /**
+     * Execute a command by retrieving it from the ApplicationContext and calling its execute method.
+     * The command can be an interface, and Spring will resolve the concrete implementation.
+     *
+     * @param commandClass the command interface/class to execute
+     * @param request      the request object to pass to the command
+     * @param <R>          the request type
+     * @param <T>          the response type
+     * @return the response from the command execution
+     * @throws RuntimeException if the command execution fails
+     */
+    public <R, T> T execute(Class<? extends Command<R, T>> commandClass, R request) throws RuntimeException {
+        log.debug("Executing command: {}", commandClass.getSimpleName());
 
-    Command<R, T> command = applicationContext.getBean(commandClass);
-    T result = command.execute(request);
+        Command<R, T> command = applicationContext.getBean(commandClass);
+        T result = command.execute(request);
 
-    log.debug("Command {} executed successfully", commandClass.getSimpleName());
-    return result;
-  }
+        log.debug("Command {} executed successfully", commandClass.getSimpleName());
+        return result;
+    }
 }

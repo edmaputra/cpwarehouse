@@ -17,20 +17,20 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class HardDeleteItemCommandImpl implements HardDeleteItemCommand {
 
-  private final ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
-  @Override
-  @Transactional
-  public Void execute(String id) {
-    log.info("Hard deleting item with ID: {}", id);
+    @Override
+    @Transactional
+    public Void execute(String id) {
+        log.info("Hard deleting item with ID: {}", id);
 
-    if (!itemRepository.existsById(id)) {
-      throw new ResourceNotFoundException("Item", "ID", id);
+        if (!itemRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Item", "ID", id);
+        }
+
+        itemRepository.deleteById(id);
+        log.info("Item permanently deleted with ID: {}", id);
+
+        return null;
     }
-
-    itemRepository.deleteById(id);
-    log.info("Item permanently deleted with ID: {}", id);
-
-    return null;
-  }
 }

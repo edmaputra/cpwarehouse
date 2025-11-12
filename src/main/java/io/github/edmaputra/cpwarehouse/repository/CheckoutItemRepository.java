@@ -13,18 +13,18 @@ import java.util.Optional;
 @Repository
 public interface CheckoutItemRepository extends MongoRepository<CheckoutItem, String> {
 
-  /**
-   * Find checkout by reference.
-   */
-  Optional<CheckoutItem> findByCheckoutReference(String checkoutReference);
+    /**
+     * Find checkout by reference.
+     */
+    Optional<CheckoutItem> findByCheckoutReference(String checkoutReference);
 
-  /**
-   * Find all checkouts by customer.
-   */
-  List<CheckoutItem> findByCustomerId(String customerId);
+    /**
+     * Find all checkouts by customer.
+     */
+    List<CheckoutItem> findByCustomerId(String customerId);
 
-  /**
-   * Find checkouts by status.
-   */
-  List<CheckoutItem> findByStatus(CheckoutItem.CheckoutStatus status);
+    /**
+     * Find checkouts by status.
+     */
+    List<CheckoutItem> findByStatus(CheckoutItem.CheckoutStatus status);
 }

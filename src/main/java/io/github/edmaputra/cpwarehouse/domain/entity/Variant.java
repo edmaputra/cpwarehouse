@@ -25,53 +25,53 @@ import java.util.Map;
 @CompoundIndex(name = "itemId_isActive_idx", def = "{'itemId': 1, 'isActive': 1}")
 public class Variant {
 
-  @Id
-  private String id;
+    @Id
+    private String id;
 
-  @Indexed
-  private String itemId;
+    @Indexed
+    private String itemId;
 
-  @Indexed(unique = true)
-  private String variantSku;
+    @Indexed(unique = true)
+    private String variantSku;
 
-  private String variantName;
+    private String variantName;
 
-  /**
-   * Flexible key-value pairs for variant attributes (e.g., size: L, color: Red).
-   * Stored as a nested document in MongoDB.
-   */
-  private Map<String, String> attributes;
+    /**
+     * Flexible key-value pairs for variant attributes (e.g., size: L, color: Red).
+     * Stored as a nested document in MongoDB.
+     */
+    private Map<String, String> attributes;
 
-  /**
-   * Price adjustment from the base item price.
-   * Can be positive or negative, but final price (basePrice + priceAdjustment) must be >= 0.
-   */
-  @Builder.Default
-  private BigDecimal priceAdjustment = BigDecimal.ZERO;
+    /**
+     * Price adjustment from the base item price.
+     * Can be positive or negative, but final price (basePrice + priceAdjustment) must be >= 0.
+     */
+    @Builder.Default
+    private BigDecimal priceAdjustment = BigDecimal.ZERO;
 
-  @Indexed
-  @Builder.Default
-  private Boolean isActive = true;
+    @Indexed
+    @Builder.Default
+    private Boolean isActive = true;
 
-  private Long createdAt;
+    private Long createdAt;
 
-  private Long updatedAt;
+    private Long updatedAt;
 
-  /**
-   * Lifecycle callback to set timestamps before persisting.
-   */
-  public void prePersist() {
-    long now = System.currentTimeMillis();
-    if (this.createdAt == null) {
-      this.createdAt = now;
+    /**
+     * Lifecycle callback to set timestamps before persisting.
+     */
+    public void prePersist() {
+        long now = System.currentTimeMillis();
+        if (this.createdAt == null) {
+            this.createdAt = now;
+        }
+        this.updatedAt = now;
     }
-    this.updatedAt = now;
-  }
 
-  /**
-   * Lifecycle callback to update timestamp before updating.
-   */
-  public void preUpdate() {
-    this.updatedAt = System.currentTimeMillis();
-  }
+    /**
+     * Lifecycle callback to update timestamp before updating.
+     */
+    public void preUpdate() {
+        this.updatedAt = System.currentTimeMillis();
+    }
 }

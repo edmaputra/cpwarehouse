@@ -9,12 +9,12 @@ import io.github.edmaputra.cpwarehouse.dto.response.VariantResponse;
  */
 public interface UpdateVariantCommand extends Command<UpdateVariantCommand.Request, VariantResponse> {
 
-  /**
-   * Request object for updating a variant.
-   *
-   * @param id      the variant ID to update
-   * @param request the update request data
-   */
-  record Request(String id, VariantUpdateRequest request) {
-  }
+    /**
+     * Request object for updating a variant.
+     *
+     * @param id      the variant ID to update
+     * @param request the update request data
+     */
+    record Request(String id, VariantUpdateRequest request) {
+    }
 }

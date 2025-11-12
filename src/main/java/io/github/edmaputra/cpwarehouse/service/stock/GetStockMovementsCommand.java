@@ -11,9 +11,9 @@ import org.springframework.data.domain.Pageable;
  */
 public interface GetStockMovementsCommand extends Command<GetStockMovementsCommand.Request, Page<StockMovementResponse>> {
 
-  /**
-   * Request wrapper for getting stock movements with filters.
-   */
-  record Request(String stockId, MovementType movementType, Pageable pageable) {
-  }
+    /**
+     * Request wrapper for getting stock movements with filters.
+     */
+    record Request(String stockId, MovementType movementType, Pageable pageable) {
+    }
 }

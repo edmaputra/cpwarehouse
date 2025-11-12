@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockAvailabilityResponse {
 
-  private String stockId;
-  private Integer quantity;
-  private Integer reservedQuantity;
-  private Integer availableQuantity;
-  private Boolean isAvailable;
+    private String stockId;
+    private Integer quantity;
+    private Integer reservedQuantity;
+    private Integer availableQuantity;
+    private Boolean isAvailable;
 }

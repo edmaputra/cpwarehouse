@@ -17,28 +17,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Component
 public class TestHelper {
 
-  @Autowired
-  MockMvc mockMvc;
+    @Autowired
+    MockMvc mockMvc;
 
-  @Autowired
-  ObjectMapper objectMapper;
+    @Autowired
+    ObjectMapper objectMapper;
 
-  public String createTestItem(String sku, String name, BigDecimal basePrice) throws Exception {
-    ItemCreateRequest request = ItemCreateRequest.builder()
-        .sku(sku)
-        .name(name)
-        .description("Test description for " + name)
-        .basePrice(basePrice)
-        .build();
+    public String createTestItem(String sku, String name, BigDecimal basePrice) throws Exception {
+        ItemCreateRequest request = ItemCreateRequest.builder()
+                .sku(sku)
+                .name(name)
+                .description("Test description for " + name)
+                .basePrice(basePrice)
+                .build();
 
-    MvcResult result = mockMvc.perform(post("/api/v1/items").contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated()).andReturn();
+        MvcResult result = mockMvc.perform(post("/api/v1/items").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andExpect(status().isCreated()).andReturn();
 
-    String responseContent = result.getResponse().getContentAsString();
+        String responseContent = result.getResponse().getContentAsString();
 
-    // Parse the response to extract the item ID
-    JsonNode jsonNode = objectMapper.readTree(responseContent);
+        // Parse the response to extract the item ID
+        JsonNode jsonNode = objectMapper.readTree(responseContent);
 
-    return jsonNode.get("data").get("id").asText();
-  }
+        return jsonNode.get("data").get("id").asText();
+    }
 }

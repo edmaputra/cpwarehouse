@@ -20,19 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetStockByVariantCommandImpl implements GetStockByVariantCommand {
 
-  private final StockRepository stockRepository;
-  private final StockMapper stockMapper;
+    private final StockRepository stockRepository;
+    private final StockMapper stockMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public StockResponse execute(String variantId) {
-    log.info("Getting stock for variant: {}", variantId);
+    @Override
+    @Transactional(readOnly = true)
+    public StockResponse execute(String variantId) {
+        log.info("Getting stock for variant: {}", variantId);
 
-    Stock stock = stockRepository.findByVariantId(variantId)
-        .orElseThrow(() -> new ResourceNotFoundException("Stock", "variantId", variantId));
+        Stock stock = stockRepository.findByVariantId(variantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Stock", "variantId", variantId));
 
-    log.info("Stock found for variant: {}", variantId);
+        log.info("Stock found for variant: {}", variantId);
 
-    return stockMapper.toResponse(stock);
-  }
+        return stockMapper.toResponse(stock);
+    }
 }

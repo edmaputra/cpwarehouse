@@ -17,13 +17,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockReserveRequest {
 
-  @NotNull(message = "Quantity is required")
-  @Min(value = 1, message = "Quantity must be greater than 0")
-  private Integer quantity;
+    @NotNull(message = "Quantity is required")
+    @Min(value = 1, message = "Quantity must be greater than 0")
+    private Integer quantity;
 
-  @Size(max = 100, message = "Reference number must not exceed 100 characters")
-  private String referenceNumber;
+    @Size(max = 100, message = "Reference number must not exceed 100 characters")
+    private String referenceNumber;
 
-  @NotNull(message = "Created by is required")
-  private String createdBy;
+    @NotNull(message = "Created by is required")
+    private String createdBy;
 }

@@ -17,15 +17,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockCreateRequest {
 
-  @NotNull(message = "Item ID is required")
-  private String itemId;
+    @NotNull(message = "Item ID is required")
+    private String itemId;
 
-  private String variantId; // Optional - null means stock for base item
+    private String variantId; // Optional - null means stock for base item
 
-  @NotNull(message = "Quantity is required")
-  @Min(value = 0, message = "Quantity must be greater than or equal to 0")
-  private Integer quantity;
+    @NotNull(message = "Quantity is required")
+    @Min(value = 0, message = "Quantity must be greater than or equal to 0")
+    private Integer quantity;
 
-  @Size(max = 100, message = "Warehouse location must not exceed 100 characters")
-  private String warehouseLocation;
+    @Size(max = 100, message = "Warehouse location must not exceed 100 characters")
+    private String warehouseLocation;
 }

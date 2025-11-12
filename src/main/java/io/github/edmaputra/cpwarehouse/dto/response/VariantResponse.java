@@ -17,19 +17,19 @@ import java.util.Map;
 @AllArgsConstructor
 public class VariantResponse {
 
-  private String id;
-  private String itemId;
-  private String variantSku;
-  private String variantName;
-  private Map<String, String> attributes;
-  private BigDecimal priceAdjustment;
-  private Boolean isActive;
-  private Long createdAt;
-  private Long updatedAt;
+    private String id;
+    private String itemId;
+    private String variantSku;
+    private String variantName;
+    private Map<String, String> attributes;
+    private BigDecimal priceAdjustment;
+    private Boolean isActive;
+    private Long createdAt;
+    private Long updatedAt;
 
-  /**
-   * Calculated final price (basePrice + priceAdjustment).
-   * Set by service layer when item information is available.
-   */
-  private BigDecimal finalPrice;
+    /**
+     * Calculated final price (basePrice + priceAdjustment).
+     * Set by service layer when item information is available.
+     */
+    private BigDecimal finalPrice;
 }

@@ -16,12 +16,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ItemResponse {
 
-  private String id;
-  private String sku;
-  private String name;
-  private String description;
-  private BigDecimal basePrice;
-  private Boolean isActive;
-  private Long createdAt;
-  private Long updatedAt;
+    private String id;
+    private String sku;
+    private String name;
+    private String description;
+    private BigDecimal basePrice;
+    private Boolean isActive;
+    private Long createdAt;
+    private Long updatedAt;
 }

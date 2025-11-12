@@ -19,19 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class HardDeleteVariantCommandImpl implements HardDeleteVariantCommand {
 
-  private final VariantRepository variantRepository;
+    private final VariantRepository variantRepository;
 
-  @Override
-  @Transactional
-  public Void execute(String id) {
-    log.warn("Permanently deleting variant with ID: {}", id);
+    @Override
+    @Transactional
+    public Void execute(String id) {
+        log.warn("Permanently deleting variant with ID: {}", id);
 
-    Variant variant = variantRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
+        Variant variant = variantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
 
-    variantRepository.delete(variant);
-    log.warn("Variant permanently deleted: {}", id);
+        variantRepository.delete(variant);
+        log.warn("Variant permanently deleted: {}", id);
 
-    return null;
-  }
+        return null;
+    }
 }

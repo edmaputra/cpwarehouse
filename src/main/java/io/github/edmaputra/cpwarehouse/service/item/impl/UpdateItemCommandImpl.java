@@ -21,30 +21,30 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class UpdateItemCommandImpl implements UpdateItemCommand {
 
-  private final ItemRepository itemRepository;
-  private final ItemMapper itemMapper;
+    private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
 
-  @Override
-  @Transactional
-  public ItemResponse execute(UpdateItemCommand.Request request) {
-    String id = request.id();
-    ItemUpdateRequest updateRequest = request.updateRequest();
+    @Override
+    @Transactional
+    public ItemResponse execute(UpdateItemCommand.Request request) {
+        String id = request.id();
+        ItemUpdateRequest updateRequest = request.updateRequest();
 
-    log.info("Updating item with ID: {}", id);
+        log.info("Updating item with ID: {}", id);
 
-    // Find existing item
-    Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
+        // Find existing item
+        Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
 
-    // Note: SKU cannot be updated (it's immutable after creation)
+        // Note: SKU cannot be updated (it's immutable after creation)
 
-    // Update entity
-    itemMapper.updateEntityFromRequest(updateRequest, item);
-    item.preUpdate();
+        // Update entity
+        itemMapper.updateEntityFromRequest(updateRequest, item);
+        item.preUpdate();
 
-    // Save and return
-    Item updatedItem = itemRepository.save(item);
-    log.info("Item updated successfully with ID: {}", id);
+        // Save and return
+        Item updatedItem = itemRepository.save(item);
+        log.info("Item updated successfully with ID: {}", id);
 
-    return itemMapper.toResponse(updatedItem);
-  }
+        return itemMapper.toResponse(updatedItem);
+    }
 }

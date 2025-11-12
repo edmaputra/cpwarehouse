@@ -28,53 +28,53 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class CreateVariantCommandImpl implements CreateVariantCommand {
 
-  private final VariantRepository variantRepository;
-  private final CommandExecutor commandExecutor;
-  private final VariantMapper variantMapper;
+    private final VariantRepository variantRepository;
+    private final CommandExecutor commandExecutor;
+    private final VariantMapper variantMapper;
 
-  @Override
-  @Transactional
-  public VariantResponse execute(VariantCreateRequest request) {
-    log.info("Creating new variant with SKU: {} for item ID: {}", request.getVariantSku(), request.getItemId());
+    @Override
+    @Transactional
+    public VariantResponse execute(VariantCreateRequest request) {
+        log.info("Creating new variant with SKU: {} for item ID: {}", request.getVariantSku(), request.getItemId());
 
-    // Validate that item exists and is active using GetItemByIdCommand
-    ItemDetailResponse item = commandExecutor.execute(GetItemByIdCommand.class, request.getItemId());
+        // Validate that item exists and is active using GetItemByIdCommand
+        ItemDetailResponse item = commandExecutor.execute(GetItemByIdCommand.class, request.getItemId());
 
-    if (!item.getIsActive()) {
-      throw new InvalidOperationException("Cannot create variant for inactive item with ID: " + request.getItemId());
+        if (!item.getIsActive()) {
+            throw new InvalidOperationException("Cannot create variant for inactive item with ID: " + request.getItemId());
+        }
+
+        // Check for duplicate variant SKU
+        if (variantRepository.findByVariantSku(request.getVariantSku()).isPresent()) {
+            throw new DuplicateResourceException("Variant", "SKU", request.getVariantSku());
+        }
+
+        // Validate final price (basePrice + priceAdjustment) must be >= 0
+        BigDecimal priceAdjustment = BigDecimal.ZERO;
+        if (request.getPriceAdjustment() != null) {
+            priceAdjustment = request.getPriceAdjustment();
+        }
+        request.setPriceAdjustment(priceAdjustment);
+        BigDecimal finalPrice = item.getBasePrice().add(priceAdjustment);
+
+        if (finalPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidOperationException(
+                    String.format("Final price cannot be negative. Base price: %s, Price adjustment: %s, Final price: %s",
+                            item.getBasePrice(), priceAdjustment, finalPrice));
+        }
+
+        // Map request to entity
+        Variant variant = variantMapper.toEntity(request);
+        variant.prePersist();
+
+        // Save and return
+        Variant savedVariant = variantRepository.save(variant);
+        log.info("Variant created successfully with ID: {} and SKU: {}", savedVariant.getId(),
+                savedVariant.getVariantSku());
+
+        VariantResponse response = variantMapper.toResponse(savedVariant);
+        response.setFinalPrice(finalPrice);
+
+        return response;
     }
-
-    // Check for duplicate variant SKU
-    if (variantRepository.findByVariantSku(request.getVariantSku()).isPresent()) {
-      throw new DuplicateResourceException("Variant", "SKU", request.getVariantSku());
-    }
-
-    // Validate final price (basePrice + priceAdjustment) must be >= 0
-    BigDecimal priceAdjustment = BigDecimal.ZERO;
-    if (request.getPriceAdjustment() != null) {
-        priceAdjustment = request.getPriceAdjustment();
-    }
-    request.setPriceAdjustment(priceAdjustment);
-    BigDecimal finalPrice = item.getBasePrice().add(priceAdjustment);
-
-    if (finalPrice.compareTo(BigDecimal.ZERO) < 0) {
-      throw new InvalidOperationException(
-          String.format("Final price cannot be negative. Base price: %s, Price adjustment: %s, Final price: %s",
-              item.getBasePrice(), priceAdjustment, finalPrice));
-    }
-
-    // Map request to entity
-    Variant variant = variantMapper.toEntity(request);
-    variant.prePersist();
-
-    // Save and return
-    Variant savedVariant = variantRepository.save(variant);
-    log.info("Variant created successfully with ID: {} and SKU: {}", savedVariant.getId(),
-        savedVariant.getVariantSku());
-
-    VariantResponse response = variantMapper.toResponse(savedVariant);
-    response.setFinalPrice(finalPrice);
-
-    return response;
-  }
 }

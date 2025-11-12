@@ -11,9 +11,9 @@ import org.springframework.data.domain.Pageable;
  */
 public interface GetAllItemsCommand extends Command<GetAllItemsCommand.Request, Page<ItemResponse>> {
 
-  /**
-   * Request wrapper for getAllItems operation.
-   */
-  record Request(Pageable pageable, Boolean activeOnly, String search) {
-  }
+    /**
+     * Request wrapper for getAllItems operation.
+     */
+    record Request(Pageable pageable, Boolean activeOnly, String search) {
+    }
 }

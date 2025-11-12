@@ -17,17 +17,17 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CheckoutResponse {
 
-  private String id;
-  private String itemId;
-  private String variantId;
-  private String stockId;
-  private Integer quantity;
-  private BigDecimal pricePerUnit;
-  private BigDecimal totalPrice;
-  private String reservationId;
-  private CheckoutItem.CheckoutStatus status;
-  private String customerId;
-  private String checkoutReference;
-  private Long createdAt;
-  private Long updatedAt;
+    private String id;
+    private String itemId;
+    private String variantId;
+    private String stockId;
+    private Integer quantity;
+    private BigDecimal pricePerUnit;
+    private BigDecimal totalPrice;
+    private String reservationId;
+    private CheckoutItem.CheckoutStatus status;
+    private String customerId;
+    private String checkoutReference;
+    private Long createdAt;
+    private Long updatedAt;
 }

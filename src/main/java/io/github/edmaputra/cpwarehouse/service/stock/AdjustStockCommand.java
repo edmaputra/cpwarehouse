@@ -9,9 +9,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.StockResponse;
  */
 public interface AdjustStockCommand extends Command<AdjustStockCommand.Request, StockResponse> {
 
-  /**
-   * Request wrapper for stock adjustment with stock ID.
-   */
-  record Request(String stockId, StockAdjustRequest adjustRequest) {
-  }
+    /**
+     * Request wrapper for stock adjustment with stock ID.
+     */
+    record Request(String stockId, StockAdjustRequest adjustRequest) {
+    }
 }

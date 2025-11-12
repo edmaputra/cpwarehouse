@@ -25,38 +25,38 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class CreateStockCommandImpl implements CreateStockCommand {
 
-  private final StockRepository stockRepository;
-  private final CommandExecutor commandExecutor;
-  private final StockMapper stockMapper;
+    private final StockRepository stockRepository;
+    private final CommandExecutor commandExecutor;
+    private final StockMapper stockMapper;
 
-  @Override
-  @Transactional
-  public StockResponse execute(StockCreateRequest request) {
-    log.info("Creating stock for itemId: {}, variantId: {}", request.getItemId(), request.getVariantId());
+    @Override
+    @Transactional
+    public StockResponse execute(StockCreateRequest request) {
+        log.info("Creating stock for itemId: {}, variantId: {}", request.getItemId(), request.getVariantId());
 
-    // Validate item exists using CommandExecutor
-    commandExecutor.execute(GetItemByIdCommand.class, request.getItemId());
+        // Validate item exists using CommandExecutor
+        commandExecutor.execute(GetItemByIdCommand.class, request.getItemId());
 
-    // Validate variant exists if provided
-    if (StringUtils.hasText(request.getVariantId())) {
-      commandExecutor.execute(GetVariantByIdCommand.class, request.getVariantId());
+        // Validate variant exists if provided
+        if (StringUtils.hasText(request.getVariantId())) {
+            commandExecutor.execute(GetVariantByIdCommand.class, request.getVariantId());
+        }
+
+        // Check for duplicate stock record
+        if (stockRepository.existsByItemIdAndVariantId(request.getItemId(), request.getVariantId())) {
+            String identifier = StringUtils.hasText(request.getVariantId())
+                    ? "itemId=" + request.getItemId() + ", variantId=" + request.getVariantId()
+                    : "itemId=" + request.getItemId();
+            throw new DuplicateResourceException("Stock", "item-variant combination", identifier);
+        }
+
+        // Map and save
+        Stock stock = stockMapper.toEntity(request);
+        stock.prePersist();
+
+        Stock savedStock = stockRepository.save(stock);
+        log.info("Stock created successfully with ID: {}", savedStock.getId());
+
+        return stockMapper.toResponse(savedStock);
     }
-
-    // Check for duplicate stock record
-    if (stockRepository.existsByItemIdAndVariantId(request.getItemId(), request.getVariantId())) {
-      String identifier = StringUtils.hasText(request.getVariantId())
-          ? "itemId=" + request.getItemId() + ", variantId=" + request.getVariantId()
-          : "itemId=" + request.getItemId();
-      throw new DuplicateResourceException("Stock", "item-variant combination", identifier);
-    }
-
-    // Map and save
-    Stock stock = stockMapper.toEntity(request);
-    stock.prePersist();
-
-    Stock savedStock = stockRepository.save(stock);
-    log.info("Stock created successfully with ID: {}", savedStock.getId());
-
-    return stockMapper.toResponse(savedStock);
-  }
 }

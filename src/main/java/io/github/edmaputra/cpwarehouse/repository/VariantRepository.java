@@ -17,45 +17,45 @@ import java.util.Optional;
 @Repository
 public interface VariantRepository extends MongoRepository<Variant, String>, VariantRepositoryCustom {
 
-  /**
-   * Find a variant by variant SKU.
-   *
-   * @param variantSku the variant SKU to search for
-   * @return Optional containing the variant if found
-   */
-  Optional<Variant> findByVariantSku(String variantSku);
+    /**
+     * Find a variant by variant SKU.
+     *
+     * @param variantSku the variant SKU to search for
+     * @return Optional containing the variant if found
+     */
+    Optional<Variant> findByVariantSku(String variantSku);
 
-  /**
-   * Find all variants for a specific item.
-   *
-   * @param itemId the item ID
-   * @return list of variants
-   */
-  List<Variant> findByItemId(String itemId);
+    /**
+     * Find all variants for a specific item.
+     *
+     * @param itemId the item ID
+     * @return list of variants
+     */
+    List<Variant> findByItemId(String itemId);
 
-  /**
-   * Find all variants for a specific item with pagination.
-   *
-   * @param itemId   the item ID
-   * @param pageable pagination information
-   * @return page of variants
-   */
-  Page<Variant> findByItemId(String itemId, Pageable pageable);
+    /**
+     * Find all variants for a specific item with pagination.
+     *
+     * @param itemId   the item ID
+     * @param pageable pagination information
+     * @return page of variants
+     */
+    Page<Variant> findByItemId(String itemId, Pageable pageable);
 
-  /**
-   * Find all active variants for a specific item.
-   *
-   * @param itemId   the item ID
-   * @param isActive the active status
-   * @return list of variants
-   */
-  List<Variant> findByItemIdAndIsActive(String itemId, Boolean isActive);
+    /**
+     * Find all active variants for a specific item.
+     *
+     * @param itemId   the item ID
+     * @param isActive the active status
+     * @return list of variants
+     */
+    List<Variant> findByItemIdAndIsActive(String itemId, Boolean isActive);
 
-  /**
-   * Count variants by item ID.
-   *
-   * @param itemId the item ID
-   * @return count of variants
-   */
-  long countByItemId(String itemId);
+    /**
+     * Count variants by item ID.
+     *
+     * @param itemId the item ID
+     * @return count of variants
+     */
+    long countByItemId(String itemId);
 }

@@ -15,14 +15,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockMovementResponse {
 
-  private String id;
-  private String stockId;
-  private MovementType movementType;
-  private Integer quantity;
-  private Integer previousQuantity;
-  private Integer newQuantity;
-  private String referenceNumber;
-  private String notes;
-  private String createdBy;
-  private Long createdAt;
+    private String id;
+    private String stockId;
+    private MovementType movementType;
+    private Integer quantity;
+    private Integer previousQuantity;
+    private Integer newQuantity;
+    private String referenceNumber;
+    private String notes;
+    private String createdBy;
+    private Long createdAt;
 }

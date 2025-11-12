@@ -21,27 +21,27 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateItemCommandImpl implements CreateItemCommand {
 
-  private final ItemRepository itemRepository;
-  private final ItemMapper itemMapper;
+    private final ItemRepository itemRepository;
+    private final ItemMapper itemMapper;
 
-  @Override
-  @Transactional
-  public ItemResponse execute(ItemCreateRequest request) {
-    log.info("Creating new item with SKU: {}", request.getSku());
+    @Override
+    @Transactional
+    public ItemResponse execute(ItemCreateRequest request) {
+        log.info("Creating new item with SKU: {}", request.getSku());
 
-    // Check for duplicate SKU
-    if (itemRepository.findBySku(request.getSku()).isPresent()) {
-      throw new DuplicateResourceException("Item", "SKU", request.getSku());
+        // Check for duplicate SKU
+        if (itemRepository.findBySku(request.getSku()).isPresent()) {
+            throw new DuplicateResourceException("Item", "SKU", request.getSku());
+        }
+
+        // Map request to entity
+        Item item = itemMapper.toEntity(request);
+        item.prePersist();
+
+        // Save and return
+        Item savedItem = itemRepository.save(item);
+        log.info("Item created successfully with ID: {} and SKU: {}", savedItem.getId(), savedItem.getSku());
+
+        return itemMapper.toResponse(savedItem);
     }
-
-    // Map request to entity
-    Item item = itemMapper.toEntity(request);
-    item.prePersist();
-
-    // Save and return
-    Item savedItem = itemRepository.save(item);
-    log.info("Item created successfully with ID: {} and SKU: {}", savedItem.getId(), savedItem.getSku());
-
-    return itemMapper.toResponse(savedItem);
-  }
 }

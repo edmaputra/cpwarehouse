@@ -16,38 +16,38 @@ import java.util.List;
 @Repository
 public interface StockMovementRepository extends MongoRepository<StockMovement, String> {
 
-  /**
-   * Find all stock movements for a specific stock record with pagination.
-   *
-   * @param stockId  the stock ID
-   * @param pageable pagination information
-   * @return page of stock movements
-   */
-  Page<StockMovement> findByStockId(String stockId, Pageable pageable);
+    /**
+     * Find all stock movements for a specific stock record with pagination.
+     *
+     * @param stockId  the stock ID
+     * @param pageable pagination information
+     * @return page of stock movements
+     */
+    Page<StockMovement> findByStockId(String stockId, Pageable pageable);
 
-  /**
-   * Find stock movements by stock ID and movement type with pagination.
-   *
-   * @param stockId      the stock ID
-   * @param movementType the movement type
-   * @param pageable     pagination information
-   * @return page of stock movements
-   */
-  Page<StockMovement> findByStockIdAndMovementType(String stockId, MovementType movementType, Pageable pageable);
+    /**
+     * Find stock movements by stock ID and movement type with pagination.
+     *
+     * @param stockId      the stock ID
+     * @param movementType the movement type
+     * @param pageable     pagination information
+     * @return page of stock movements
+     */
+    Page<StockMovement> findByStockIdAndMovementType(String stockId, MovementType movementType, Pageable pageable);
 
-  /**
-   * Find all stock movements for a specific stock record.
-   *
-   * @param stockId the stock ID
-   * @return list of stock movements ordered by createdAt descending
-   */
-  List<StockMovement> findByStockIdOrderByCreatedAtDesc(String stockId);
+    /**
+     * Find all stock movements for a specific stock record.
+     *
+     * @param stockId the stock ID
+     * @return list of stock movements ordered by createdAt descending
+     */
+    List<StockMovement> findByStockIdOrderByCreatedAtDesc(String stockId);
 
-  /**
-   * Find stock movements by reference number.
-   *
-   * @param referenceNumber the reference number
-   * @return list of stock movements
-   */
-  List<StockMovement> findByReferenceNumber(String referenceNumber);
+    /**
+     * Find stock movements by reference number.
+     *
+     * @param referenceNumber the reference number
+     * @return list of stock movements
+     */
+    List<StockMovement> findByReferenceNumber(String referenceNumber);
 }

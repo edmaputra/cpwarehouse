@@ -21,20 +21,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetVariantsByItemIdCommandImpl implements GetVariantsByItemIdCommand {
 
-  private final VariantRepository variantRepository;
-  private final VariantMapper variantMapper;
+    private final VariantRepository variantRepository;
+    private final VariantMapper variantMapper;
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<VariantResponse> execute(String itemId) {
-    log.info("Getting all variants for item ID: {}", itemId);
+    @Override
+    @Transactional(readOnly = true)
+    public List<VariantResponse> execute(String itemId) {
+        log.info("Getting all variants for item ID: {}", itemId);
 
-    List<Variant> variants = variantRepository.findByItemId(itemId);
+        List<Variant> variants = variantRepository.findByItemId(itemId);
 
-    log.info("Found {} variants for item ID: {}", variants.size(), itemId);
+        log.info("Found {} variants for item ID: {}", variants.size(), itemId);
 
-    return variants.stream()
-        .map(variantMapper::toResponse)
-        .toList();
-  }
+        return variants.stream()
+                .map(variantMapper::toResponse)
+                .toList();
+    }
 }

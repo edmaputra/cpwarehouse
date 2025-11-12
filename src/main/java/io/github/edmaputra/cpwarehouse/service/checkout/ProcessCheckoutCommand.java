@@ -10,9 +10,9 @@ import io.github.edmaputra.cpwarehouse.dto.response.CheckoutResponse;
  */
 public interface ProcessCheckoutCommand extends Command<ProcessCheckoutCommand.Request, CheckoutResponse> {
 
-  /**
-   * Request wrapper for checkout.
-   */
-  record Request(CheckoutRequest checkoutRequest) {
-  }
+    /**
+     * Request wrapper for checkout.
+     */
+    record Request(CheckoutRequest checkoutRequest) {
+    }
 }

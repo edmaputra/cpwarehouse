@@ -18,21 +18,21 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeleteItemCommandImpl implements DeleteItemCommand {
 
-  private final ItemRepository itemRepository;
+    private final ItemRepository itemRepository;
 
-  @Override
-  @Transactional
-  public Void execute(String id) {
-    log.info("Soft deleting item with ID: {}", id);
+    @Override
+    @Transactional
+    public Void execute(String id) {
+        log.info("Soft deleting item with ID: {}", id);
 
-    Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
+        Item item = itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Item", "ID", id));
 
-    item.setIsActive(false);
-    item.preUpdate();
+        item.setIsActive(false);
+        item.preUpdate();
 
-    itemRepository.save(item);
-    log.info("Item soft deleted successfully with ID: {}", id);
+        itemRepository.save(item);
+        log.info("Item soft deleted successfully with ID: {}", id);
 
-    return null;
-  }
+        return null;
+    }
 }

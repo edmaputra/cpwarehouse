@@ -10,14 +10,14 @@ import org.springframework.data.domain.Pageable;
  */
 public interface ItemRepositoryCustom {
 
-  /**
-   * Find all items with pagination and dynamic filtering.
-   * Supports filtering by active status and text search on name/SKU.
-   *
-   * @param pageable   pagination information (page, size, sort)
-   * @param activeOnly filter by active status (null for all items)
-   * @param search     search term for name or SKU (case-insensitive, null for no search)
-   * @return page of items matching the criteria
-   */
-  Page<Item> findAllWithFilters(Pageable pageable, Boolean activeOnly, String search);
+    /**
+     * Find all items with pagination and dynamic filtering.
+     * Supports filtering by active status and text search on name/SKU.
+     *
+     * @param pageable   pagination information (page, size, sort)
+     * @param activeOnly filter by active status (null for all items)
+     * @param search     search term for name or SKU (case-insensitive, null for no search)
+     * @return page of items matching the criteria
+     */
+    Page<Item> findAllWithFilters(Pageable pageable, Boolean activeOnly, String search);
 }

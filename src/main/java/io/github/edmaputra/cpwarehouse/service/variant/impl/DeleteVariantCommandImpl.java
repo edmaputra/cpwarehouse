@@ -18,22 +18,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class DeleteVariantCommandImpl implements DeleteVariantCommand {
 
-  private final VariantRepository variantRepository;
+    private final VariantRepository variantRepository;
 
-  @Override
-  @Transactional
-  public Void execute(String id) {
-    log.info("Soft deleting variant with ID: {}", id);
+    @Override
+    @Transactional
+    public Void execute(String id) {
+        log.info("Soft deleting variant with ID: {}", id);
 
-    Variant variant = variantRepository.findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
+        Variant variant = variantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Variant", "id", id));
 
-    variant.setIsActive(false);
-    variant.preUpdate();
+        variant.setIsActive(false);
+        variant.preUpdate();
 
-    variantRepository.save(variant);
-    log.info("Variant soft deleted successfully: {}", id);
+        variantRepository.save(variant);
+        log.info("Variant soft deleted successfully: {}", id);
 
-    return null;
-  }
+        return null;
+    }
 }

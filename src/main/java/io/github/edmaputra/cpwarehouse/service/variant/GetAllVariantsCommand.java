@@ -10,14 +10,14 @@ import org.springframework.data.domain.Pageable;
  */
 public interface GetAllVariantsCommand extends Command<GetAllVariantsCommand.Request, Page<VariantResponse>> {
 
-  /**
-   * Request object for getting all variants.
-   *
-   * @param pageable pagination information
-   * @param itemId   optional filter by item ID
-   * @param isActive optional filter by active status
-   * @param search   optional search term for variant SKU or name
-   */
-  record Request(Pageable pageable, String itemId, Boolean isActive, String search) {
-  }
+    /**
+     * Request object for getting all variants.
+     *
+     * @param pageable pagination information
+     * @param itemId   optional filter by item ID
+     * @param isActive optional filter by active status
+     * @param search   optional search term for variant SKU or name
+     */
+    record Request(Pageable pageable, String itemId, Boolean isActive, String search) {
+    }
 }
