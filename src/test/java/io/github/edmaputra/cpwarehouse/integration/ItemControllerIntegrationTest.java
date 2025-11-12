@@ -31,28 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Integration tests for ItemController.
- */
-@SpringBootTest
-@AutoConfigureMockMvc
-    //@Testcontainers
-class ItemControllerIntegrationTest {
-
-  //    @Container
-  //    static MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:7.0"))
-  //            .withExposedPorts(27017);
-
-  //    @DynamicPropertySource
-  //    static void setProperties(DynamicPropertyRegistry registry) {
-  //        registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
-  //    }
-
-  @Autowired
-  MockMvc mockMvc;
-
-  @Autowired
-  ObjectMapper objectMapper;
+class ItemControllerIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   ItemRepository itemRepository;

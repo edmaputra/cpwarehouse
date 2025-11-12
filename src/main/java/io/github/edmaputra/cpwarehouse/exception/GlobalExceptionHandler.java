@@ -69,6 +69,20 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(errorDetail));
   }
 
+  @ExceptionHandler(InsufficientStockException.class)
+  public ResponseEntity<ApiResponse<Void>> handleInsufficientStockException(InsufficientStockException ex,
+      HttpServletRequest request) {
+
+    ApiResponse.ErrorDetail errorDetail = ApiResponse.ErrorDetail.builder()
+        .code("INSUFFICIENT_STOCK")
+        .message(ex.getMessage())
+        .timestamp(System.currentTimeMillis())
+        .path(request.getRequestURI())
+        .build();
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(errorDetail));
+  }
+
   /**
    * Handle validation errors from @Valid annotation.
    */
