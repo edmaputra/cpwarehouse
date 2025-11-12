@@ -1,6 +1,7 @@
 package io.github.edmaputra.cpwarehouse.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,11 +17,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Generic API response wrapper")
 public class ApiResponse<T> {
 
+    @Schema(description = "Success flag", example = "true")
     private Boolean success;
+    
+    @Schema(description = "Response data")
     private T data;
+    
+    @Schema(description = "Optional message", example = "Operation completed successfully", nullable = true)
     private String message;
+    
+    @Schema(description = "Error details (only present on failure)", nullable = true)
     private ErrorDetail error;
 
     /**
@@ -65,11 +74,21 @@ public class ApiResponse<T> {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @Schema(description = "Error detail information")
     public static class ErrorDetail {
+        @Schema(description = "Error code", example = "RESOURCE_NOT_FOUND")
         private String code;
+        
+        @Schema(description = "Error message", example = "Item not found with ID: 123")
         private String message;
+        
+        @Schema(description = "Additional error details", nullable = true)
         private Object details;
+        
+        @Schema(description = "Error timestamp (epoch millis)", example = "1700000000000")
         private Long timestamp;
+        
+        @Schema(description = "Request path where error occurred", example = "/api/items/123")
         private String path;
     }
 }

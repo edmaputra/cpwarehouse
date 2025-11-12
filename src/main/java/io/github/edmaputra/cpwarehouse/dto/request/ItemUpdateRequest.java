@@ -1,5 +1,6 @@
 package io.github.edmaputra.cpwarehouse.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
@@ -19,20 +20,25 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "Request to update an existing item")
 public class ItemUpdateRequest {
 
     @NotBlank(message = "Name is required")
     @Size(min = 3, max = 255, message = "Name must be between 3 and 255 characters")
+    @Schema(description = "Updated item name", example = "Premium Laptop Pro")
     private String name;
 
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    @Schema(description = "Updated description", example = "High-performance laptop for professionals with upgraded specs", nullable = true)
     private String description;
 
     @NotNull(message = "Base price is required")
     @DecimalMin(value = "0.0", inclusive = true, message = "Base price must be greater than or equal to 0")
     @Digits(integer = 10, fraction = 2, message = "Base price must have at most 10 integer digits and 2 decimal places")
+    @Schema(description = "Updated base price", example = "1199.99", minimum = "0")
     private BigDecimal basePrice;
 
     @NotNull(message = "isActive is required")
+    @Schema(description = "Whether the item is active and available for sale", example = "true")
     private Boolean isActive;
 }
