@@ -1,4 +1,4 @@
-package io.github.edmaputra.cpwarehouse.service.item.command.impl;
+package io.github.edmaputra.cpwarehouse.service.item.impl;
 
 import io.github.edmaputra.cpwarehouse.domain.entity.Item;
 import io.github.edmaputra.cpwarehouse.dto.request.ItemUpdateRequest;
@@ -6,7 +6,7 @@ import io.github.edmaputra.cpwarehouse.dto.response.ItemResponse;
 import io.github.edmaputra.cpwarehouse.exception.ResourceNotFoundException;
 import io.github.edmaputra.cpwarehouse.mapper.ItemMapper;
 import io.github.edmaputra.cpwarehouse.repository.ItemRepository;
-import io.github.edmaputra.cpwarehouse.service.item.command.UpdateItemCommand;
+import io.github.edmaputra.cpwarehouse.service.item.UpdateItemCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

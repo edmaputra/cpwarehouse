@@ -1,9 +1,9 @@
-package io.github.edmaputra.cpwarehouse.service.item.command.impl;
+package io.github.edmaputra.cpwarehouse.service.item.impl;
 
 import io.github.edmaputra.cpwarehouse.dto.response.ItemResponse;
 import io.github.edmaputra.cpwarehouse.repository.ItemRepository;
 import io.github.edmaputra.cpwarehouse.mapper.ItemMapper;
-import io.github.edmaputra.cpwarehouse.service.item.command.GetAllItemsCommand;
+import io.github.edmaputra.cpwarehouse.service.item.GetAllItemsCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

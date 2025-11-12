@@ -1,4 +1,4 @@
-package io.github.edmaputra.cpwarehouse.service.item.command;
+package io.github.edmaputra.cpwarehouse.service.item;
 
 import io.github.edmaputra.cpwarehouse.common.Command;
 import io.github.edmaputra.cpwarehouse.dto.response.ItemResponse;
