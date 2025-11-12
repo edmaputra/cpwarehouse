@@ -160,7 +160,6 @@ class CheckoutPaymentIntegrationTest extends BaseIntegrationTest {
     // When - Process payment
     PaymentRequest paymentRequest = PaymentRequest.builder()
         .paymentAmount(new BigDecimal("1100.00"))
-        .paymentSuccess(true)
         .paymentReference("PAY-001")
         .processedBy("SYSTEM")
         .build();
@@ -178,47 +177,6 @@ class CheckoutPaymentIntegrationTest extends BaseIntegrationTest {
     assertThat(updatedStock.getQuantity()).isEqualTo(90); // 100 - 10
     assertThat(updatedStock.getReservedQuantity()).isEqualTo(0);
     assertThat(updatedStock.getAvailableQuantity()).isEqualTo(90);
-  }
-
-  @Test
-  void payment_WithFailedPayment_ShouldReleaseStock() throws Exception {
-    // Given - Create checkout first
-    CheckoutRequest checkoutRequest = CheckoutRequest.builder()
-        .itemId(testItem.getId())
-        .variantId(testVariant.getId())
-        .quantity(8)
-        .customerId("CUST-003")
-        .checkoutReference("CHECKOUT-004")
-        .build();
-
-    MvcResult checkoutResult = mockMvc.perform(post("/api/v1/checkout").contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsString(checkoutRequest))).andExpect(status().isOk()).andReturn();
-
-    String checkoutJson = checkoutResult.getResponse().getContentAsString();
-    CheckoutResponse checkoutResponse =
-        objectMapper.readValue(objectMapper.readTree(checkoutJson).get("data").toString(), CheckoutResponse.class);
-
-    // When - Process payment with failure
-    PaymentRequest paymentRequest = PaymentRequest.builder()
-        .paymentAmount(new BigDecimal("880.00"))
-        .paymentSuccess(false)
-        .paymentReference("PAY-002")
-        .processedBy("SYSTEM")
-        .build();
-
-    mockMvc.perform(post(
-            "/api/v1/checkout/" + checkoutResponse.getId() + "/payment").contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(paymentRequest)))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.paymentSuccess").value(false))
-        .andExpect(jsonPath("$.data.status").value("PAYMENT_FAILED"));
-
-    // Then - Verify stock is released (only reserved is reduced)
-    Stock updatedStock = stockRepository.findById(testStock.getId()).orElseThrow();
-    assertThat(updatedStock.getQuantity()).isEqualTo(100); // Unchanged
-    assertThat(updatedStock.getReservedQuantity()).isEqualTo(0);
-    assertThat(updatedStock.getAvailableQuantity()).isEqualTo(100);
   }
 
   @Test
@@ -242,7 +200,7 @@ class CheckoutPaymentIntegrationTest extends BaseIntegrationTest {
     // When - Process payment with insufficient amount
     PaymentRequest paymentRequest =
         PaymentRequest.builder().paymentAmount(new BigDecimal("500.00")) // Less than required 550.00
-            .paymentSuccess(true).paymentReference("PAY-003").processedBy("SYSTEM").build();
+            .paymentReference("PAY-003").processedBy("SYSTEM").build();
 
     // Then
     mockMvc.perform(post(

@@ -16,8 +16,6 @@ services:
     volumes:
       - mongodb_data:/data/db
       - ./src/main/resources/db/init:/docker-entrypoint-initdb.d:ro
-    networks:
-      - cpwarehouse-network
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/cpwarehouse -u cpwarehouse_user -p cpwarehouse_pass --authenticationDatabase cpwarehouse --quiet
       interval: 10s
@@ -25,27 +23,7 @@ services:
       retries: 5
       start_period: 40s
 
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: cpwarehouse-mongo-express
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
-      ME_CONFIG_MONGODB_ADMINPASSWORD: admin123
-      ME_CONFIG_MONGODB_URL: mongodb://admin:admin123@mongodb:27017/
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: admin123
-    networks:
-      - cpwarehouse-network
-    depends_on:
-      mongodb:
-        condition: service_healthy
 
 volumes:
   mongodb_data:
     driver: local
-
-networks:
-  cpwarehouse-network:
-    driver: bridge

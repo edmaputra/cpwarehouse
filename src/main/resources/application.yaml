@@ -4,7 +4,8 @@ spring:
   
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://cpwarehouse_user:cpwarehouse_pass@localhost:27017/cpwarehouse?authSource=cpwarehouse}
+#      uri: ${MONGODB_URI:mongodb://cpwarehouse_user:cpwarehouse_pass@localhost:27017/cpwarehouse?authSource=cpwarehouse}
+      uri: ${MONGODB_URI:mongodb://cpwarehouse_user:cpwarehouse_pass@172.30.217.224:27017/cpwarehouse?authSource=cpwarehouse}
       auto-index-creation: true
 
 # Pagination defaults

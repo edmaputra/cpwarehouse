@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 
 /**
  * Implementation of ProcessPaymentCommand.
- * Validates payment amount and commits or releases stock.
+ * Validates payment amount and commits stock (successful payment only).
  */
 @Slf4j
 @Service
@@ -49,9 +49,8 @@ public class ProcessPaymentCommandImpl implements ProcessPaymentCommand {
   public PaymentResponse execute(Request request) {
     PaymentRequest paymentRequest = request.paymentRequest();
 
-    log.info("Processing payment - checkoutId: {}, amount: {}, success: {}",
-        request.checkoutId(), paymentRequest.getPaymentAmount(), 
-        paymentRequest.getPaymentSuccess());
+    log.info("Processing payment - checkoutId: {}, amount: {}",
+        request.checkoutId(), paymentRequest.getPaymentAmount());
 
     // 1. Get checkout item
     CheckoutItem checkout = checkoutItemRepository.findById(request.checkoutId())
@@ -80,17 +79,8 @@ public class ProcessPaymentCommandImpl implements ProcessPaymentCommand {
         .orElseThrow(() -> new ResourceNotFoundException("StockMovement", "id", 
             checkout.getReservationId()));
 
-    PaymentResponse response;
-
-    if (paymentRequest.getPaymentSuccess()) {
-      // Payment succeeded - commit stock (OUT movement)
-      response = processSuccessfulPayment(checkout, stock, reservation, paymentRequest);
-    } else {
-      // Payment failed - release stock (RELEASE movement)
-      response = processFailedPayment(checkout, stock, reservation, paymentRequest);
-    }
-
-    return response;
+    // 6. Process successful payment - commit stock (OUT movement)
+    return processSuccessfulPayment(checkout, stock, reservation, paymentRequest);
   }
 
   /**
@@ -144,59 +134,6 @@ public class ProcessPaymentCommandImpl implements ProcessPaymentCommand {
         .paymentSuccess(true)
         .paymentReference(paymentRequest.getPaymentReference())
         .message("Payment successful. Stock committed.")
-        .processedAt(System.currentTimeMillis())
-        .build();
-  }
-
-  /**
-   * Process failed payment - release stock with RELEASE movement.
-   */
-  private PaymentResponse processFailedPayment(CheckoutItem checkout, Stock stock,
-                                                 StockMovement reservation, PaymentRequest paymentRequest) {
-    log.info("Payment failed - releasing stock for checkout: {}", checkout.getId());
-
-    // Only reduce reserved quantity
-    int previousReserved = stock.getReservedQuantity();
-
-    stock.setReservedQuantity(previousReserved - checkout.getQuantity());
-    stock.preUpdate();
-    Stock savedStock = stockRepository.save(stock);
-
-    // Create RELEASE movement
-    StockMovement releaseMovement = StockMovement.builder()
-        .stockId(savedStock.getId())
-        .movementType(StockMovement.MovementType.RELEASE)
-        .quantity(checkout.getQuantity())
-        .previousQuantity(previousReserved)
-        .newQuantity(savedStock.getReservedQuantity())
-        .referenceNumber(paymentRequest.getPaymentReference())
-        .createdBy(paymentRequest.getProcessedBy())
-        .relatedMovementId(reservation.getId())
-        .build();
-    releaseMovement.prePersist();
-    StockMovement savedReleaseMovement = stockMovementRepository.save(releaseMovement);
-
-    // Mark reservation as released
-    reservation.setReleasedAt(System.currentTimeMillis());
-    reservation.setReleaseMovementId(savedReleaseMovement.getId());
-    stockMovementRepository.save(reservation);
-
-    // Update checkout status
-    checkout.setStatus(CheckoutItem.CheckoutStatus.PAYMENT_FAILED);
-    checkout.preUpdate();
-    checkoutItemRepository.save(checkout);
-
-    log.info("Stock released - checkout: {}, releaseMovement: {}, reservedQuantity: {}",
-        checkout.getId(), savedReleaseMovement.getId(), savedStock.getReservedQuantity());
-
-    return PaymentResponse.builder()
-        .checkoutId(checkout.getId())
-        .status(CheckoutItem.CheckoutStatus.PAYMENT_FAILED)
-        .totalPrice(checkout.getTotalPrice())
-        .paidAmount(paymentRequest.getPaymentAmount())
-        .paymentSuccess(false)
-        .paymentReference(paymentRequest.getPaymentReference())
-        .message("Payment failed. Stock released.")
         .processedAt(System.currentTimeMillis())
         .build();
   }

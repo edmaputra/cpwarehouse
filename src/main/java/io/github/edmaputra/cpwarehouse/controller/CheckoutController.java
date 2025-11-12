@@ -59,8 +59,8 @@ public class CheckoutController {
       @PathVariable String checkoutId,
       @Valid @RequestBody PaymentRequest request) {
 
-    log.info("POST /api/v1/checkout/{}/payment - Processing payment, amount: {}, success: {}",
-        checkoutId, request.getPaymentAmount(), request.getPaymentSuccess());
+    log.info("POST /api/v1/checkout/{}/payment - Processing payment, amount: {}",
+        checkoutId, request.getPaymentAmount());
 
     ProcessPaymentCommand.Request commandRequest = new ProcessPaymentCommand.Request(checkoutId, request);
     PaymentResponse response = commandExecutor.execute(ProcessPaymentCommand.class, commandRequest);

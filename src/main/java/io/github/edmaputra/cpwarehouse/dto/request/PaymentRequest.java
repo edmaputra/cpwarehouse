@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 
 /**
  * DTO for payment request.
- * Processes payment, validates amount, and commits or releases stock.
+ * Processes successful payment, validates amount, and commits stock.
  */
 @Data
 @Builder
@@ -23,9 +23,6 @@ public class PaymentRequest {
   @NotNull(message = "Payment amount is required")
   @DecimalMin(value = "0.01", message = "Payment amount must be greater than 0")
   private BigDecimal paymentAmount;
-
-  @NotNull(message = "Payment success flag is required")
-  private Boolean paymentSuccess;
 
   @Size(max = 100, message = "Payment reference must not exceed 100 characters")
   private String paymentReference;
