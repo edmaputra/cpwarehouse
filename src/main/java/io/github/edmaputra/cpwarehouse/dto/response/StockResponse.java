@@ -25,4 +25,5 @@ public class StockResponse {
   private Long createdAt;
   private Long updatedAt;
   private Long version;
+  private String reservationId;
 }
