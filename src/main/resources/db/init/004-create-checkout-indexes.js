@@ -1,7 +1,7 @@
 // MongoDB initialization script for checkout_items collection
 // Create indexes for checkout_items collection
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Create index on customerId for customer order history
 db.checkout_items.createIndex(

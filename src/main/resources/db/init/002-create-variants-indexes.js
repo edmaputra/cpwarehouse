@@ -1,7 +1,7 @@
 // MongoDB initialization script for variants collection
 // Create indexes for variants collection
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Create unique index on variantSku field
 db.variants.createIndex(

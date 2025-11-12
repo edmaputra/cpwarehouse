@@ -1,7 +1,7 @@
 // MongoDB initialization script for items collection
 // Create indexes for items collection
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Create unique index on sku field
 db.items.createIndex(

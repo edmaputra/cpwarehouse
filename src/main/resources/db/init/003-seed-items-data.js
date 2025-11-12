@@ -1,6 +1,6 @@
 // MongoDB seed data for items collection (development only)
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Insert sample items for development/testing
 db.items.insertMany([

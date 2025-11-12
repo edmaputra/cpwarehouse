@@ -1,7 +1,7 @@
 // MongoDB initialization script for stock_movements collection
 // Create indexes for stock_movements collection
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Create index on stockId for efficient movement lookup by stock
 db.stock_movements.createIndex(

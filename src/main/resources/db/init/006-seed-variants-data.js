@@ -1,6 +1,6 @@
 // MongoDB seed data for variants collection (development only)
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Get item IDs for reference
 const itemTshirt = db.items.findOne({ sku: "ITEM-001" });

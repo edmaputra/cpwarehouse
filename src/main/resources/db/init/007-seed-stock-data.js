@@ -1,6 +1,6 @@
 // MongoDB seed data for stock collection (development only)
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Get variants for reference
 const variants = db.variants.find().toArray();

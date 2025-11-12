@@ -1,7 +1,7 @@
 // MongoDB initialization script for stock collection
 // Create indexes for stock collection
 
-db = db.getSiblingDB('cpwarehouse_db');
+db = db.getSiblingDB('cpwarehouse');
 
 // Create unique compound index on itemId and variantId (one stock record per item-variant combination)
 db.stock.createIndex(
@@ -9,7 +9,7 @@ db.stock.createIndex(
     { 
         unique: true,
         name: "idx_stock_item_variant",
-        partialFilterExpression: { "variantId": { $ne: null } }
+        partialFilterExpression: { "variantId": { $type: "string" } }
     }
 );
 
@@ -19,7 +19,7 @@ db.stock.createIndex(
     { 
         unique: true,
         name: "idx_stock_item_only",
-        partialFilterExpression: { "variantId": null }
+        partialFilterExpression: { "variantId": { $type: "null" } }
     }
 );
 
