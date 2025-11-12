@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * StockMovement entity representing audit trail for stock changes.
  * Records all stock movements including type, quantity changes, and reference information.
+ * Uses optimistic locking with @Version to prevent race conditions in release operations.
  */
 @Data
 @Builder
@@ -21,6 +23,14 @@ public class StockMovement {
 
   @Id
   private String id;
+
+  /**
+   * Version field for optimistic locking.
+   * Prevents concurrent modification issues during release operations.
+   * Critical for preventing double-release of the same reservation.
+   */
+  @Version
+  private Long version;
 
   /**
    * Reference to the stock record.

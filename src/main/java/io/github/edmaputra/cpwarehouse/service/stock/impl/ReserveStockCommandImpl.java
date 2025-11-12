@@ -1,10 +1,12 @@
 package io.github.edmaputra.cpwarehouse.service.stock.impl;
 
+import io.github.edmaputra.cpwarehouse.common.CommonRetryable;
 import io.github.edmaputra.cpwarehouse.domain.entity.Stock;
 import io.github.edmaputra.cpwarehouse.domain.entity.StockMovement;
 import io.github.edmaputra.cpwarehouse.dto.request.StockReserveRequest;
 import io.github.edmaputra.cpwarehouse.dto.response.StockResponse;
 import io.github.edmaputra.cpwarehouse.exception.InsufficientStockException;
+import io.github.edmaputra.cpwarehouse.exception.InvalidOperationException;
 import io.github.edmaputra.cpwarehouse.exception.ResourceNotFoundException;
 import io.github.edmaputra.cpwarehouse.mapper.StockMapper;
 import io.github.edmaputra.cpwarehouse.repository.StockMovementRepository;
@@ -13,8 +15,10 @@ import io.github.edmaputra.cpwarehouse.service.stock.ReserveStockCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,13 +37,14 @@ public class ReserveStockCommandImpl implements ReserveStockCommand {
 
   @Override
   @Transactional
-  @Retryable(
-      retryFor = OptimisticLockingFailureException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 100)
-  )
+  @CommonRetryable
   public StockResponse execute(Request request) {
-    log.info("Reserving stock {} quantity: {}", request.stockId(), request.reserveRequest().getQuantity());
+    // Get current retry context for debugging
+    RetryContext context = RetrySynchronizationManager.getContext();
+    int retryCount = context != null ? context.getRetryCount() : 0;
+    
+    log.info("Reserving stock {} quantity: {} [Retry attempt: {}]",
+        request.stockId(), request.reserveRequest().getQuantity(), retryCount + 1);
 
     Stock stock = stockRepository.findById(request.stockId())
         .orElseThrow(() -> new ResourceNotFoundException("Stock", "id", request.stockId()));

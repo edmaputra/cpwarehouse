@@ -1,5 +1,6 @@
 package io.github.edmaputra.cpwarehouse.service.stock.impl;
 
+import io.github.edmaputra.cpwarehouse.common.CommonRetryable;
 import io.github.edmaputra.cpwarehouse.domain.entity.Stock;
 import io.github.edmaputra.cpwarehouse.domain.entity.StockMovement;
 import io.github.edmaputra.cpwarehouse.dto.request.StockReleaseRequest;
@@ -13,8 +14,11 @@ import io.github.edmaputra.cpwarehouse.service.stock.ReleaseStockCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.retry.RetryContext;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +37,15 @@ public class ReleaseStockCommandImpl implements ReleaseStockCommand {
 
   @Override
   @Transactional
-  @Retryable(
-      retryFor = OptimisticLockingFailureException.class,
-      maxAttempts = 3,
-      backoff = @Backoff(delay = 100)
-  )
+  @CommonRetryable
   public StockResponse execute(Request request) {
+    // Get current retry context for debugging
+    RetryContext context = RetrySynchronizationManager.getContext();
+    int retryCount = context != null ? context.getRetryCount() : 0;
+    
+    log.info("Processing release for stock {} [Retry attempt: {}]",
+        request.stockId(), retryCount + 1);
+    
     Stock stock = stockRepository.findById(request.stockId())
         .orElseThrow(() -> new ResourceNotFoundException("Stock", "id", request.stockId()));
 
